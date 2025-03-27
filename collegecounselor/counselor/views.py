@@ -4,7 +4,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import User, Post, Recycle_Event
 import bcrypt
 import requests
 import urllib
@@ -15,3 +14,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 
 # Create your views here.
+
+
+def home(request):
+    return render(request, 'home.html')
