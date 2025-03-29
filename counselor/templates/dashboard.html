@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Welcome, {{ user.username }}!</h2>
+
+<h3>Academic Profile</h3>
+{% if academic_profile %}
+<p>GPA: {{ academic_profile.gpa }}</p>
+<p>SAT Score: {{ academic_profile.sat_score }}</p>
+<a href="{% url 'update_academic_profile' %}">Edit</a>
+{% else %}
+<a href="{% url 'update_academic_profile' %}">Add Academic Profile</a>
+{% endif %}
+
+<h3>College & Career Goals</h3>
+{% if college_goals %}
+<p>Intended Major: {{ college_goals.intended_major }}</p>
+<a href="{% url 'update_college_goals' %}">Edit</a>
+{% else %}
+<a href="{% url 'update_college_goals' %}">Add College Goals</a>
+{% endif %}
+
+<h3>Extracurriculars</h3>
+<ul>
+    {% for activity in extracurriculars %}
+    <li>{{ activity.name }} - {{ activity.position }}</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'add_extracurricular' %}">Add Extracurricular</a>
+
+<h3>College Applications</h3>
+<ul>
+    {% for app in college_apps %}
+    <li>{{ app.college }} - {{ app.application_status }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+
