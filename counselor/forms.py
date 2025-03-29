@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, AcademicProfile, CollegeAndCareerGoals, Extracurricular, Award, CollegeApplication, Scholarship
+from .models import * 
 
 class CustomUserForm(UserCreationForm):
     class Meta:
@@ -37,3 +37,9 @@ class ScholarshipForm(forms.ModelForm):
         model = Scholarship
         fields = ['name', 'amount', 'deadline', 'status']
 
+class ChatMessageForm(forms.ModelForm):
+    class Meta:
+        model = Chat
+        fields = ['message', 'receiver']
+
+    receiver = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput())

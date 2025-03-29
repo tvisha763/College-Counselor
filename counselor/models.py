@@ -101,3 +101,13 @@ class Scholarship(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.name} ({self.status})"
 
+
+# websocket stuff
+class Chat(models.Model):
+    sender = models.ForeignKey(User, related_name="sent_messages", on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name="received_messages", on_delete=models.CASCADE)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender.username} -> {self.receiver.username} at {self.timestamp}"

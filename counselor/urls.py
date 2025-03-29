@@ -52,4 +52,6 @@ urlpatterns = [
 
     path('colleges/', college_list, name='college_list'),
     path('add_college/', add_college, name='add_college'),
+
+    path('chat/<int:user_id>/', views.chat_view, name='chat'),
 ]

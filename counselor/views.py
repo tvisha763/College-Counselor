@@ -14,12 +14,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 
-from .forms import (
-    CustomUserForm, AcademicProfileForm, CollegeAndCareerGoalsForm, 
-    ExtracurricularForm, AwardForm, CollegeApplicationForm, ScholarshipForm
-)
-from .models import AcademicProfile, CollegeAndCareerGoals, Extracurricular, Award, CollegeApplication, Scholarship
-
+from .forms import * 
+from .models import *
 
 def home(request):
     return render(request, 'home.html')
@@ -218,3 +214,17 @@ def add_college(request):
         )
         return redirect('college_list')
     return render(request, 'add_college.html')
+
+def chat_view(request, user_id):
+    receiver = User.objects.get(id=user_id)
+    messages = Chat.objects.filter(sender=request.user, receiver=receiver) | Chat.objects.filter(sender=receiver, receiver=request.user)
+    messages = messages.order_by('timestamp')
+    form = ChatMessageForm(request.POST or None, initial={'receiver': receiver})
+
+    if form.is_valid():
+        message = form.save(commit=False)
+        message.sender = request.user
+        message.save()
+        return redirect('chat', user_id=user_id)
+
+    return render(request, 'chat/chat_view.html', {'messages': messages, 'form': form, 'receiver': receiver})
