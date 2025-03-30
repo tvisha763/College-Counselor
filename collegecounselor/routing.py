@@ -1,6 +1,11 @@
 from django.urls import re_path
-from counselor import consumers
+from . import consumers
 
 websocket_urlpatterns = [
-    re_path(r'ws/chat/(?P<room_name>\w+)/$', consumers.ChatConsumer.as_asgi()),
+    # For one-to-one chats using user IDs
+    re_path(r'ws/chat/(?P<receiver_id>\d+)/$', consumers.ChatConsumer.as_asgi()),
+    
+    # Optional: Add these if you need group/room functionality later
+    # re_path(r'ws/group/(?P<group_id>\d+)/$', consumers.GroupChatConsumer.as_asgi()),
+    # re_path(r'ws/notifications/$', consumers.NotificationConsumer.as_asgi()),
 ]
