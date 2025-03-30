@@ -34,7 +34,7 @@ class TakenCourseInline(admin.TabularInline):
     model = TakenCourse
     extra = 1
 
-class UserAdmin(admin.ModelAdmin):
+class UserCourseAdmin(admin.ModelAdmin):
     inlines = (TakenCourseInline,)
 
 class ScheduleAdmin(admin.ModelAdmin):
@@ -145,7 +145,7 @@ class TakenECInline(admin.TabularInline):
     model = TakenEC
     extra = 1
 
-class UserAdmin(admin.ModelAdmin):
+class UserECAdmin(admin.ModelAdmin):
     inlines = (TakenECInline,)
 
 class ECAdmin(admin.ModelAdmin):
@@ -161,7 +161,7 @@ class WonAwardInline(admin.TabularInline):
     model = WonAward
     extra = 1
 
-class UserAdmin(admin.ModelAdmin):
+class UserAwardAdmin(admin.ModelAdmin):
     inlines = (WonAwardInline,)
 
 class AwardAdmin(admin.ModelAdmin):
@@ -177,7 +177,7 @@ class SentMessageInline(admin.TabularInline):
     model = SentMessage
     extra = 1
 
-class UserAdmin(admin.ModelAdmin):
+class UserMessageAdmin(admin.ModelAdmin):
     inlines = (SentMessageInline,)
 
 class MessageAdmin(admin.ModelAdmin):
