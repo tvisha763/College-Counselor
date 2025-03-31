@@ -7,9 +7,16 @@ from django.contrib import admin
 # Create your models here.
 class Course(models.Model):
     name = models.CharField(max_length=1000)
+    TYPE = [
+        (1, 'Regular'),
+        (2, 'Honors'),
+        (3, 'AP'),
+        (4, 'IB')
+    ]
+    type = models.IntegerField(default=9, choices=TYPE, blank=True, null=True)
     description = models.TextField()
     def __str__(self):
-        return self.name
+        return '%s - %s' % (self.name, self.type)
 
 class Schedule(models.Model):
     id_phrase = models.CharField(max_length=2000)
@@ -83,7 +90,7 @@ class User(models.Model):
     college_goals = models.TextField(blank=True, null=True)
     major_goals = models.TextField(blank=True, null=True)
 
-    resume = models.FileField(upload_to="resumes/", blank=True, null=True)
+    resume = models.FileField(upload_to="resumes", blank=True, null=True)
 
     class_rank = models.IntegerField(blank=True, null=True)
     class_size = models.IntegerField(blank=True, null=True)
@@ -121,8 +128,8 @@ class User(models.Model):
 
     grades = models.JSONField(blank=True, null=True)  # Store as {"class1": ["year", "sem 1": "B", "sem 2": "B"], "class2": ["year", "sem 1": "B", "sem 2": "B"]}
 
-    extracurricular = models.ManyToManyField(Extracurricular, through='TakenEC', blank=True)
-    award = models.ManyToManyField(Award, through='WonAward', blank=True)
+    extracurriculars = models.ManyToManyField(Extracurricular, through='TakenEC', blank=True)
+    awards = models.ManyToManyField(Award, through='WonAward', blank=True)
 
     def __str__(self):
         return self.fname + ' ' + self.lname

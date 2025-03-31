@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,9 @@
 <body>
     <form action="{% url 'login' %}" method="POST">
         {% csrf_token %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
         <input type="email" placeholder="Email" name="email">
         <input type="password" placeholder="Password" name="password">
         <button type = "submit">Submit</button>

@@ -136,4 +136,55 @@ def edit_profile(request):
     if not request.session.get('logged_in'):
         return redirect('/login')
     else:
-        return render(request, "edit_profile.html")
+        user = User.objects.get(email=request.session["email"])
+        context = {
+            'user' : user,
+        }
+        if request.method == "POST":
+            fname = request.POST.get('fname')
+            lname = request.POST.get('lname')
+            email = request.POST.get('email')
+            grade = request.POST.get('grade')
+            location = request.POST.get('location')
+            citizenship = request.POST.get('citizenship')
+            first_gen = request.POST.get('first_gen')
+            ethnicity = request.POST.get('ethnicity')
+            gender = request.POST.get('gender')
+            college_goals = request.POST.get('college_goals')
+            major_goals = request.POST.get('major_goals')
+            resume = request.FILES.get('resume')
+            class_rank = request.POST.get('class_rank')
+            class_size = request.POST.get('class_size')
+            psat = request.POST.get('psat')
+            sat = request.POST.get('sat')
+            act = request.POST.get('act')
+            school = request.POST.get('school')
+
+            inputs = [fname, lname, email, grade, location, citizenship, first_gen, ethnicity, gender, college_goals, major_goals, resume, class_rank, class_size, psat, sat, act, school]
+
+            for i in range(len(inputs)):
+                if inputs[i] == "":
+                    inputs[i] = None               
+
+            user.fname = inputs[0]
+            user.lname = inputs[1]
+            user.email = inputs[2]
+            user.grade = inputs[3]
+            user.location = inputs[4]
+            user.citizenship_status = inputs[5]
+            user.first_gen = inputs[6]
+            user.ethnicity = inputs[7]
+            user.gender = inputs[8]
+            user.college_goals = inputs[9]
+            user.major_goals = inputs[10]
+            user.resume = inputs[11]
+            user.class_rank = inputs[12]
+            user.class_size = inputs[13]
+            user.psat = inputs[14]
+            user.sat = inputs[15]
+            user.act = inputs[16]
+            user.school = inputs[17]
+            user.save()
+
+        
+        return render(request, "edit_profile.html", context)

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,5 +8,62 @@
 </head>
 <body>
     Edit Profile
+    <form action="{% url 'edit_profile' %}" method="POST">
+        {% csrf_token %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+        <input type="text" placeholder="First Name" name="fname" value="{{user.fname}}">
+        <input type="text" placeholder="Last Name" name="lname" value="{{user.lname}}">
+        <input type="email" placeholder="Email" name="email" value="{{user.email}}">
+        <input type="text" placeholder="School" name="school" value="{{user.school}}">
+        <select name="grade" value="{{user.grade}}">
+            <option value=0>Grade</option>
+            <option value=9>Freshman</option>
+            <option value=10>Sophomore</option>
+            <option value=11>Junior</option>
+            <option value=12>Senior</option>
+        </select>
+        <input type="text" placeholder="Location" name="location" value="{{user.location}}">
+        <select name="citizenship" value="{{user.citizeship_status}}">
+            <option value=0>Citizenship Status</option>
+            <option value=1>Citizen</option>
+            <option value=2>Permanent Resident</option>
+            <option value=3>International</option>
+        </select>
+        <select name="first_gen" value="{{user.first_gen}}">
+            <option value=0>First Generation Status</option>
+            <option value=1>Not First Generation</option>
+            <option value=2>First Generation</option>
+        </select>
+        {% if user.ethnicity != None %}
+            <input type="text" placeholder="Ethnicity" name="ethnicity" value="{{user.ethnicity}}">
+        {% else %}
+            <input type="text" placeholder="Ethnicity" name="ethnicity">
+        {% endif %}
+        {% if user.gender != None %}
+            <input type="text" placeholder="gender" name="gender" value="{{user.gender}}">
+        {% else %}
+            <input type="text" placeholder="gender" name="gender">
+        {% endif %}
+        {% if user.college_goals != None %}
+            <textarea name="college_goals" placeholder="College Goals">{{user.college_goals}}</textarea>
+        {% else %}
+            <textarea name="college_goals" placeholder="College Goals"></textarea>
+        {% endif %}
+        {% if user.major_goals != None %}
+            <textarea name="major_goals" placeholder="Major Goals">{{user.major_goals}}</textarea>
+        {% else %}
+            <textarea name="major_goals" placeholder="Major Goals"></textarea>
+        {% endif %}
+        <input type="file" placeholder="Resume" value="{{user.resume}}">
+        <input type="number" name="class_rank" placeholder="Class Rank" value="{{user.class_rank}}">
+        <input type="number" name="class_size" placeholder="Class Size" value="{{user.class_size}}">
+        <input type="number" name="psat" placeholder="PSAT Score" value="{{user.psat}}">
+        <input type="number" name="sat" placeholder="SAT Score" value="{{user.sat}}">
+        <input type="number" name="act" placeholder="ACT Score" value="{{user.act}}">
+        <button type = "submit">Submit</button>
+    </form>
+    <script type="text/javascript" src="{% static 'scripts/script.js' %}"></script>
 </body>
 </html>
