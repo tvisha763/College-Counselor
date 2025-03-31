@@ -8,8 +8,9 @@
 </head>
 <body>
     Edit Profile
-    <form action="{% url 'edit_profile' %}" method="POST">
+    <form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
+
         {% for message in messages %}
             {{ message }}
         {% endfor %}
@@ -18,7 +19,7 @@
         <input type="email" placeholder="Email" name="email" value="{{user.email}}">
         <input type="text" placeholder="School" name="school" value="{{user.school}}">
         <select name="grade" value="{{user.grade}}">
-            <option value=0>Grade</option>
+            <option value=None>Grade</option>
             <option value=9>Freshman</option>
             <option value=10>Sophomore</option>
             <option value=11>Junior</option>
@@ -26,13 +27,13 @@
         </select>
         <input type="text" placeholder="Location" name="location" value="{{user.location}}">
         <select name="citizenship" value="{{user.citizeship_status}}">
-            <option value=0>Citizenship Status</option>
+            <option value=None>Citizenship Status</option>
             <option value=1>Citizen</option>
             <option value=2>Permanent Resident</option>
             <option value=3>International</option>
         </select>
         <select name="first_gen" value="{{user.first_gen}}">
-            <option value=0>First Generation Status</option>
+            <option value=None>First Generation Status</option>
             <option value=1>Not First Generation</option>
             <option value=2>First Generation</option>
         </select>
