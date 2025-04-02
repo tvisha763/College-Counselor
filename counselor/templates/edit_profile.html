@@ -57,7 +57,7 @@
         {% else %}
             <textarea name="major_goals" placeholder="Major Goals"></textarea>
         {% endif %}
-        <input type="file" placeholder="Resume" value="{{user.resume}}">
+        <input type="file" name="resume" placeholder="Resume" value="{{user.resume}}">
         <input type="number" name="class_rank" placeholder="Class Rank" value="{{user.class_rank}}">
         <input type="number" name="class_size" placeholder="Class Size" value="{{user.class_size}}">
         <input type="number" name="psat" placeholder="PSAT Score" value="{{user.psat}}">
