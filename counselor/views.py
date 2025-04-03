@@ -13,69 +13,93 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import * 
 from .models import *
 
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'dashboard.html')
+
+@login_required
+def update_user(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile')
+        else:
+        form = UserUpdateForm(instance=user)
+    return render(request, 'users/update_user.html', {'form': form})
+
+@login_required
+def user_profile(request):
+    return render(request, 'users/profile.html', {'user': request.user})
 
 # User dashboard
 @login_required
 def dashboard(request):
-    academic_profile = AcademicProfile.objects.filter(user=request.user).first()
-    college_goals = CollegeAndCareerGoals.objects.filter(user=request.user).first()
-    extracurriculars = Extracurricular.objects.filter(user=request.user)
-    awards = Award.objects.filter(user=request.user)
-    college_apps = CollegeApplication.objects.filter(user=request.user)
-    scholarships = Scholarship.objects.filter(user=request.user)
-
-    return render(request, 'dashboard.html', {
-        'academic_profile': academic_profile,
-        'college_goals': college_goals,
-        'extracurriculars': extracurriculars,
-        'awards': awards,
-        'college_apps': college_apps,
-        'scholarships': scholarships,
-    })
+    user = request.user
+    context = {
+        'user': user,
+        'extracurriculars': user.extracurriculars.all(),
+        'awards': user.awards.all(),
+        'applications': user.applications.select_related('college'),
+        'scholarships': user.scholarships.all(),
+        'schedules': user.schedules.prefetch_related('courses')
+    }
+    return render(request, 'dashboard.html', context)
 
 # Form views for adding/updating user data
 @login_required
-def update_academic_profile(request):
-    profile, _ = AcademicProfile.objects.get_or_create(user=request.user)
+def update_profile(request):
     if request.method == 'POST':
-        form = AcademicProfileForm(request.POST, instance=profile)
+        form = UserProfileForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Profile updated successfully')
             return redirect('dashboard')
     else:
-        form = AcademicProfileForm(instance=profile)
-    return render(request, 'form_template.html', {'form': form, 'title': 'Update Academic Profile'})
+        form = UserProfileForm(instance=request.user)
+    
+    return render(request, 'form_template.html', {
+        'form': form,
+        'title': 'Update Profile'
+    })
 
 @login_required
 def update_college_goals(request):
-    goals, _ = CollegeAndCareerGoals.objects.get_or_create(user=request.user)
     if request.method == 'POST':
-        form = CollegeAndCareerGoalsForm(request.POST, instance=goals)
+        form = CollegeGoalsForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('dashboard')
     else:
-        form = CollegeAndCareerGoalsForm(instance=goals)
-    return render(request, 'form_template.html', {'form': form, 'title': 'Update College & Career Goals'})
+        form = CollegeGoalsForm(instance=request.user)
+    
+    return render(request, 'form_template.html', {
+        'form': form,
+        'title': 'Update College & Career Goals'
+    })
 
 @login_required
 def add_extracurricular(request):
     if request.method == 'POST':
         form = ExtracurricularForm(request.POST)
         if form.is_valid():
-            extracurricular = form.save(commit=False)
-            extracurricular.user = request.user
-            extracurricular.save()
+            ec = form.save(commit=False)
+            ec.user = request.user
+            ec.save()
+            messages.success(request, 'Extracurricular added!')
             return redirect('dashboard')
     else:
         form = ExtracurricularForm()
-    return render(request, 'form_template.html', {'form': form, 'title': 'Add Extracurricular'})
+    
+    return render(request, 'form_template.html', {
+        'form': form,
+        'title': 'Add Extracurricular'
+    })
 
 @login_required
 def edit_extracurricular(request, pk):

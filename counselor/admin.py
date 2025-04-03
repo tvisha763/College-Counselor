@@ -3,16 +3,44 @@ from .models import *
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'get_grade_display', 'school', 'location')
-    list_filter = ('grade', 'school', 'citizenship_status')
-    search_fields = ('username', 'email', 'fname', 'lname')
+    list_display = ('username', 'email', 'get_full_name', 'get_grade_display', 'school', 'location', 'citizenship_status_display')
+    list_filter = ('grade', 'school', 'citizenship_status', 'is_active', 'is_staff')
+    search_fields = ('username', 'email', 'fname', 'lname', 'school', 'location')
+    list_select_related = True
     filter_horizontal = ('groups', 'user_permissions')
+    readonly_fields = ('last_login', 'date_joined')
+    ordering = ('lname', 'fname')
+    
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal Info', {'fields': ('fname', 'lname', 'email', 'school', 'location')}),
-        ('Academic Info', {'fields': ('grade', 'class_rank', 'class_size')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Personal Info', {
+            'fields': ('fname', 'lname', 'email', 'phone_number', 'preferred_contact_method', 'school', 'location')
+        }),
+        ('Academic Info', {
+            'fields': ('grade', 'class_rank', 'class_size', 'psat', 'sat', 'act', 'fafsa_status')
+        }),
+        ('Demographics', {
+            'fields': ('citizenship_status',),
+            'classes': ('collapse',)
+        }),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            'classes': ('collapse',)
+        }),
+        ('Important Dates', {
+            'fields': ('last_login', 'date_joined'),
+            'classes': ('collapse',)
+        }),
     )
+    
+    def get_full_name(self, obj):
+        return f"{obj.fname} {obj.lname}" if obj.fname and obj.lname else None
+    get_full_name.short_description = 'Full Name'
+    get_full_name.admin_order_field = 'lname'
+    
+    def citizenship_status_display(self, obj):
+        return obj.get_citizenship_status_display() if obj.citizenship_status else None
+    citizenship_status_display.short_description = 'Citizenship Status'
 
 @admin.register(College)
 class CollegeAdmin(admin.ModelAdmin):

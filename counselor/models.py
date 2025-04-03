@@ -1,104 +1,184 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from datetime import timedelta
-from datetime import date
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class User(AbstractUser):
     # Personal Information
-    fname = models.CharField(max_length=1000, blank=True, null=True)
-    lname = models.CharField(max_length=1000, blank=True, null=True)
-    email = models.CharField(max_length=1000)
-    school = models.CharField(max_length=1000, blank=True, null=True)
-    location = models.CharField(max_length=255, default="", blank=True)
+    first_name = models.CharField(_("first name"), max_length=255, blank=True)
+    last_name = models.CharField(_("last name"), max_length=255, blank=True)
+    email = models.EmailField(_("email address"), unique=True)
+    school = models.CharField(_("school"), max_length=255, blank=True)
+    location = models.CharField(_("location"), max_length=255, blank=True)
 
     # Academic Information
-    GRADE_CHOICES = [
-        (9, 'Freshman'),
-        (10, 'Sophomore'),
-        (11, 'Junior'),
-        (12, 'Senior')
-    ]
-    grade = models.IntegerField(choices=GRADE_CHOICES, blank=True, null=True)
-    
-    # Demographics
-    CITIZENSHIP_STATUS = [
-        (1, 'Citizen'),
-        (2, 'Permanent Resident'),
-        (3, 'International')
-    ]
-    citizenship_status = models.IntegerField(choices=CITIZENSHIP_STATUS, blank=True, null=True)
-    
-    # Academic Records
-    class_rank = models.IntegerField(blank=True, null=True)
-    class_size = models.IntegerField(blank=True, null=True)
-    psat = models.IntegerField(blank=True, null=True)
-    sat = models.IntegerField(blank=True, null=True)
-    act = models.IntegerField(blank=True, null=True)
-    
-    # WebSocket Branch Fields
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    preferred_contact_method = models.CharField(
-        max_length=10,
-        choices=[("Email", "Email"), ("SMS", "SMS"), ("App", "App")],
-        default="Email"
+    class Grade(models.IntegerChoices):
+        FRESHMAN = 9, _('Freshman')
+        SOPHOMORE = 10, _('Sophomore')
+        JUNIOR = 11, _('Junior')
+        SENIOR = 12, _('Senior')
+
+    grade = models.IntegerField(
+        _("grade"),
+        choices=Grade.choices,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(9), MaxValueValidator(12)]
     )
-    fafsa_status = models.CharField(
-        max_length=50,
-        choices=[
-            ("Not Started", "Not Started"),
-            ("In Progress", "In Progress"),
-            ("Submitted", "Submitted"),
-            ("Approved", "Approved")
-        ],
-        default="Not Started"
+    
+    class_rank = models.PositiveIntegerField(
+        _("class rank"),
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1)]
+    )
+    class_size = models.PositiveIntegerField(
+        _("class size"),
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1)]
+    )
+    psat = models.PositiveIntegerField(
+        _("PSAT score"),
+        blank=True,
+        null=True,
+        validators=[MaxValueValidator(1520)]
+    )
+    sat = models.PositiveIntegerField(
+        _("SAT score"),
+        blank=True,
+        null=True,
+        validators=[MaxValueValidator(1600)]
+    )
+    act = models.PositiveIntegerField(
+        _("ACT score"),
+        blank=True,
+        null=True,
+        validators=[MaxValueValidator(36)]
     )
 
-    # Relationships
-    groups = models.ManyToManyField(Group, related_name="counselor_users", blank=True)
-    user_permissions = models.ManyToManyField(
-        Permission, 
-        related_name="counselor_users_permissions", 
-        blank=True
+    # Contact Information
+    phone_number = models.CharField(
+        _("phone number"),
+        max_length=15,
+        blank=True,
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
     )
+    preferred_contact_method = models.CharField(
+        _("preferred contact method"),
+        max_length=10,
+        choices=[
+            ("EMAIL", _("Email")),
+            ("SMS", _("SMS")),
+            ("APP", _("App"))
+        ],
+        default="EMAIL"
+    )
+
+    # Permissions
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=_("groups"),
+        blank=True,
+        help_text=_("The groups this user belongs to."),
+        related_name="counselor_users",
+        related_query_name="counselor_user",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_("user permissions"),
+        blank=True,
+        help_text=_("Specific permissions for this user."),
+        related_name="counselor_users_permissions",
+        related_query_name="counselor_user_permission",
+    )
+
+    class Meta:
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
+        ordering = ["last_name", "first_name"]
 
     def __str__(self):
-        return f"{self.fname} {self.lname}" if self.fname else self.username
+        return self.get_full_name() or self.username
+
+    @property
+    def graduation_year(self):
+        if self.grade:
+            current_year = timezone.now().year
+            return current_year + (12 - self.grade)
+        return None
 
 class Course(models.Model):
-    name = models.CharField(max_length=1000)
-    description = models.TextField(default="", blank=True)
+    name = models.CharField(_("name"), max_length=255)
+    code = models.CharField(_("course code"), max_length=20, blank=True)
+    description = models.TextField(_("description"), blank=True)
     
+    class Meta:
+        verbose_name = _("course")
+        verbose_name_plural = _("courses")
+        ordering = ["name"]
+
     def __str__(self):
         return self.name
 
 class Schedule(models.Model):
-    YEAR_CHOICES = [
-        (9, 'Freshman'),
-        (10, 'Sophomore'),
-        (11, 'Junior'),
-        (12, 'Senior')
-    ]
-    grade = models.IntegerField(choices=YEAR_CHOICES, default=9)
-    courses = models.ManyToManyField(Course, through='TakenCourse')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    
-    def __str__(self):
-        return f"{self.user}'s Schedule" if self.user else f"Schedule {self.id}"
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="schedules",
+        verbose_name=_("user")
+    )
+    year = models.PositiveIntegerField(
+        _("academic year"),
+        choices=User.Grade.choices
+    )
+    courses = models.ManyToManyField(
+        Course,
+        through="EnrolledCourse",
+        verbose_name=_("courses")
+    )
 
-class TakenCourse(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    grade = models.CharField(max_length=2, blank=True, null=True)
-    
+    class Meta:
+        verbose_name = _("schedule")
+        verbose_name_plural = _("schedules")
+        unique_together = ("user", "year")
+        ordering = ["-year"]
+
     def __str__(self):
-        return f"{self.course} in {self.schedule}"
+        return f"{self.user}'s {self.get_year_display()} Schedule"
+
+class EnrolledCourse(models.Model):
+    schedule = models.ForeignKey(
+        Schedule,
+        on_delete=models.CASCADE,
+        related_name="enrolled_courses"
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="enrollments"
+    )
+    grade = models.CharField(
+        _("grade"),
+        max_length=2,
+        blank=True,
+        validators=[RegexValidator(r'^[A-F][+-]?$')]
+    )
+
+    class Meta:
+        verbose_name = _("enrolled course")
+        verbose_name_plural = _("enrolled courses")
+        unique_together = ("schedule", "course")
+
+    def __str__(self):
+        return f"{self.course} - {self.grade}"
 
 class Extracurricular(models.Model):
-    name = models.CharField(max_length=1000)
+    name = models.CharField(max_length=255)
     description = models.TextField(default="", blank=True)
-    position = models.CharField(max_length=1000, blank=True, null=True)
+    position = models.CharField(max_length=255, blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     
@@ -113,7 +193,7 @@ class TakenEC(models.Model):
         return f"{self.user} - {self.extracurricular}"
 
 class Award(models.Model):
-    name = models.CharField(max_length=1000)
+    name = models.CharField(max_length=255)
     description = models.TextField(default="", blank=True)
     date_received = models.DateField(blank=True, null=True)
     
@@ -209,8 +289,8 @@ class Chat(models.Model):
         return self.timestamp.strftime("%b %d, %Y %I:%M %p")
 
 class College(models.Model):
-    name = models.CharField(max_length=1000)
-    application_platform = models.URLField(max_length=1000, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    application_platform = models.URLField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, default="", blank=True)
     tuition_cost = models.IntegerField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
@@ -250,7 +330,7 @@ class CollegeApplication(models.Model):
 
 class Scholarship(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=1000)
+    name = models.CharField(max_length=255)
     college = models.ForeignKey(College, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.FloatField(blank=True, null=True)
     deadline = models.DateField(default=timezone.now() + timedelta(days=30))

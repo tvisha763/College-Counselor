@@ -2,21 +2,13 @@
 {% block content %}
 <h2>Welcome, {{ user.username }}!</h2>
 
-<h3>Academic Profile</h3>
-{% if academic_profile %}
-<p>GPA: {{ academic_profile.gpa }}</p>
-<p>SAT Score: {{ academic_profile.sat_score }}</p>
-<a href="{% url 'update_academic_profile' %}">Edit</a>
+<h3>Profile</h3>
+{% if profile %}
+<p>GPA: {{ profile.gpa }}</p>
+<p>SAT Score: {{ profile.sat_score }}</p>
+<a href="{% url 'update_profile' %}">Edit</a>
 {% else %}
-<a href="{% url 'update_academic_profile' %}">Add Academic Profile</a>
-{% endif %}
-
-<h3>College & Career Goals</h3>
-{% if college_goals %}
-<p>Intended Major: {{ college_goals.intended_major }}</p>
-<a href="{% url 'update_college_goals' %}">Edit</a>
-{% else %}
-<a href="{% url 'update_college_goals' %}">Add College Goals</a>
+<a href="{% url 'update_profile' %}">Add Academic Profile</a>
 {% endif %}
 
 <h3>Extracurriculars</h3>

@@ -3,9 +3,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django import forms
+from django.contrib.auth import get_user_model
 
 from .forms import *
 from .models import *
+
+User = get_user_model()
 
 def home(request):
     return render(request, 'home.html')
@@ -28,21 +32,18 @@ def dashboard(request):
         'schedules': schedules,
     })
 
-@login_required
-def update_profile(request):
-    if request.method == 'POST':
-        form = CustomUserForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('dashboard')
-    else:
-        form = CustomUserForm(instance=request.user)
-    
-    return render(request, 'form_template.html', {
-        'form': form,
-        'title': 'Update Profile'
-    })
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'email', 'school', 'location',
+            'grade', 'class_rank', 'class_size', 'psat', 'sat', 'act',
+            'phone_number', 'preferred_contact_method'
+        ]
+        widgets = {
+            'preferred_contact_method': forms.Select(choices=User._meta.get_field('preferred_contact_method').choices),
+        }
+
 
 @login_required
 def add_extracurricular(request):
@@ -128,23 +129,18 @@ def delete_award(request, pk):
     messages.success(request, 'Award deleted!')
     return redirect('dashboard')
 
-@login_required
-def add_college_application(request):
-    if request.method == 'POST':
-        form = CollegeApplicationForm(request.POST)
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.user = request.user
-            application.save()
-            messages.success(request, 'Application added!')
-            return redirect('dashboard')
-    else:
-        form = CollegeApplicationForm()
-    
-    return render(request, 'form_template.html', {
-        'form': form,
-        'title': 'Add College Application'
-    })
+class CollegeApplicationForm(forms.ModelForm):
+    class Meta:
+        model = CollegeApplication
+        fields = ['college', 'application_type', 'deadline', 'status', 'notes']
+        widgets = {
+            'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
+        labels = {
+            'application_type': "Application Plan"
+        }
+
 
 @login_required
 def edit_college_application(request, pk):
@@ -171,24 +167,14 @@ def delete_college_application(request, pk):
     messages.success(request, 'Application deleted!')
     return redirect('dashboard')
 
-@login_required
-def add_scholarship(request):
-    if request.method == 'POST':
-        form = ScholarshipForm(request.POST)
-        if form.is_valid():
-            scholarship = form.save(commit=False)
-            scholarship.user = request.user
-            scholarship.save()
-            messages.success(request, 'Scholarship added!')
-            return redirect('dashboard')
-    else:
-        form = ScholarshipForm()
-    
-    return render(request, 'form_template.html', {
-        'form': form,
-        'title': 'Add Scholarship'
-    })
-
+class ScholarshipForm(forms.ModelForm):
+    class Meta:
+        model = Scholarship
+        fields = ['name', 'organization', 'amount', 'deadline', 'status', 'requirements']
+        widgets = {
+            'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'requirements': forms.Textarea(attrs={'rows': 4}),
+        }
 @login_required
 def edit_scholarship(request, pk):
     scholarship = get_object_or_404(Scholarship, id=pk, user=request.user)
