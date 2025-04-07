@@ -14,6 +14,7 @@ class Course(models.Model):
         (4, 'IB')
     ]
     type = models.IntegerField(default=9, choices=TYPE, blank=True, null=True)
+    organization = models.CharField(max_length=1000, blank=True, null=True)
     description = models.TextField()
     def __str__(self):
         return '%s - %s' % (self.name, self.type)
@@ -27,6 +28,11 @@ class Schedule(models.Model):
         (12, 'Senior')
     ]
     grade = models.IntegerField(default=9, choices=YEAR)
+    ap_scores = models.JSONField(blank=True, null=True)  # Store as {"Subject1": 5, "Subject2": 4}  
+    ib_scores = models.JSONField(blank=True, null=True) 
+    grades = models.JSONField(blank=True, null=True)  # Store as {"class1": ["year", "sem 1": "B", "sem 2": "B"], "class2": ["year", "sem 1": "B", "sem 2": "B"]}
+    sem1_gpa = models.FloatField(blank=True, null=True)
+    sem2_gpa = models.FloatField(blank=True, null=True)
     course = models.ManyToManyField(Course, through='TakenCourse')
     def __str__(self):
         return self.id_phrase
@@ -108,25 +114,12 @@ class User(models.Model):
     sat = models.IntegerField(blank=True, null=True)
     act = models.IntegerField(blank=True, null=True)
 
-    ap_scores = models.JSONField(blank=True, null=True)  # Store as {"Subject1": 5, "Subject2": 4}  
-    ib_scores = models.JSONField(blank=True, null=True)  
-    dual_enrollment_courses = models.JSONField(blank=True, null=True)  # List of college courses taken in HS  
-
     freshman_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="fresh_sched")
     sophomore_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="soph_sched")
     junior_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="jun_sched")
     senior_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="sen_sched")
 
-    freshman_sem1_gpa = models.FloatField(blank=True, null=True)
-    freshman_sem2_gpa = models.FloatField(blank=True, null=True)
-    sophomore_sem1_gpa = models.FloatField(blank=True, null=True)
-    sophomore_sem2_gpa = models.FloatField(blank=True, null=True)
-    junior_sem1_gpa = models.FloatField(blank=True, null=True)
-    junior_sem2_gpa = models.FloatField(blank=True, null=True)
-    senior_sem1_gpa = models.FloatField(blank=True, null=True)
-    senior_sem2_gpa = models.FloatField(blank=True, null=True)
-
-    grades = models.JSONField(blank=True, null=True)  # Store as {"class1": ["year", "sem 1": "B", "sem 2": "B"], "class2": ["year", "sem 1": "B", "sem 2": "B"]}
+    
 
     extracurriculars = models.ManyToManyField(Extracurricular, through='TakenEC', blank=True)
     awards = models.ManyToManyField(Award, through='WonAward', blank=True)
