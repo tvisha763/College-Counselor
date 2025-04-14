@@ -60,6 +60,22 @@ def signup(request):
                 user.fname = fname
                 user.lname = lname
                 user.password = bcrypt.hashpw(password, salt)
+                fresh_sched = Schedule()
+                fresh_sched.id_phrase = fname+"_"+lname+"_fresh"
+                fresh_sched.grade = 9
+                user.freshman_schedule = fresh_sched
+                soph_sched = Schedule()
+                soph_sched.id_phrase = fname+"_"+lname+"_soph"
+                soph_sched.grade = 9
+                user.sophomore_schedule = soph_sched
+                jun_sched = Schedule()
+                jun_sched.id_phrase = fname+"_"+lname+"_jun"
+                jun_sched.grade = 9
+                user.junior_schedule = jun_sched
+                sen_sched = Schedule()
+                sen_sched.id_phrase = fname+"_"+lname+"_sen"
+                sen_sched.grade = 9
+                user.senior_schedule = sen_sched
                 user.salt = salt
                 user.save()
                 user = User.objects.get(email=email)
@@ -188,3 +204,15 @@ def edit_profile(request):
 
         
         return render(request, "edit_profile.html", context)
+    
+def edit_schedule(request):
+    if not request.session.get('logged_in'):
+        return redirect('/login')
+    else:
+        if request.method == "POST":
+            user = User.objects.get(email=request.session["email"])
+            grade = request.POST.get('grade')
+            name = request.POST.get('name')
+            grade = request.POST.get('grade')
+
+        return render(request, "edit_schedule.html", context)

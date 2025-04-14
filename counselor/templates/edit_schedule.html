@@ -9,6 +9,173 @@
 <body>
     Freshman
     {% for class in freshman_sched %}
-    
+        {{ class.name }}
+        {{ class.type }}
+        {{ class.sem1_grade }}
+        {{ class.sem2_grade }}
+        {{ class.ap }}
+        {{ class.ib }}
+        {{ class.org }}
+    {% endfor %}
+    <form action="{% url 'edit_schedule' %}">
+        <input type="hidden" name="grade" value="freshman">
+        <input type="text" placeholder="Class Name" name="name">
+        <select name="type">
+            <option value=None>Class Type</option>
+            <option value=1>Regular</option>
+            <option value=2>Honors</option>
+            <option value=3>AP</option>
+            <option value=4>IB</option>
+        </select>
+        <select name="grade_1">
+            <option value=None>Semester 1 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <select name="grade_2">
+            <option value=None>Semester 2 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <input type="number" placeholder="AP Score" name="ap">
+        <input type="number" placeholder="IB Score" name="ib">
+        <input type="text" placeholder="Organization" name="org">
+        <button type="submit">Add Course</button>
+    </form>
+
+
+    Sophomore
+    {% for class in sophomore_sched %}
+        {{ class.name }}
+        {{ class.type }}
+        {{ class.sem1_grade }}
+        {{ class.sem2_grade }}
+        {{ class.ap }}
+        {{ class.ib }}
+        {{ class.org }}
+    {% endfor %}
+    <form action="{% url 'edit_schedule' %}">
+        <input type="hidden" name="grade" value="sophomore">
+        <input type="text" placeholder="Class Name" name="name">
+        <select name="type">
+            <option value=None>Class Type</option>
+            <option value=1>Regular</option>
+            <option value=2>Honors</option>
+            <option value=3>AP</option>
+            <option value=4>IB</option>
+        </select>
+        <select name="grade_1">
+            <option value=None>Semester 1 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <select name="grade_2">
+            <option value=None>Semester 2 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <input type="number" placeholder="AP Score" name="ap">
+        <input type="number" placeholder="IB Score" name="ib">
+        <input type="text" placeholder="Organization" name="org">
+        <button type="submit">Add Course</button>
+    </form>
+
+
+    Junior
+    {% for class in junior_sched %}
+        {{ class.name }}
+        {{ class.type }}
+        {{ class.sem1_grade }}
+        {{ class.sem2_grade }}
+        {{ class.ap }}
+        {{ class.ib }}
+        {{ class.org }}
+    {% endfor %}
+    <form action="{% url 'edit_schedule' %}">
+        <input type="hidden" name="grade" value="junior">
+        <input type="text" placeholder="Class Name" name="name">
+        <select name="type">
+            <option value=None>Class Type</option>
+            <option value=1>Regular</option>
+            <option value=2>Honors</option>
+            <option value=3>AP</option>
+            <option value=4>IB</option>
+        </select>
+        <select name="grade_1">
+            <option value=None>Semester 1 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <select name="grade_2">
+            <option value=None>Semester 2 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <input type="number" placeholder="AP Score" name="ap">
+        <input type="number" placeholder="IB Score" name="ib">
+        <input type="text" placeholder="Organization" name="org">
+        <button type="submit">Add Course</button>
+    </form>
+
+
+    Senior
+    {% for class in senior_sched %}
+        {{ class.name }}
+        {{ class.type }}
+        {{ class.sem1_grade }}
+        {{ class.sem2_grade }}
+        {{ class.ap }}
+        {{ class.ib }}
+        {{ class.org }}
+    {% endfor %}
+    <form action="{% url 'edit_schedule' %}">
+        <input type="hidden" name="grade" value="senior">
+        <input type="text" placeholder="Class Name" name="name">
+        <select name="type">
+            <option value=None>Class Type</option>
+            <option value=1>Regular</option>
+            <option value=2>Honors</option>
+            <option value=3>AP</option>
+            <option value=4>IB</option>
+        </select>
+        <select name="grade_1">
+            <option value=None>Semester 1 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <select name="grade_2">
+            <option value=None>Semester 2 Grade</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="F">F</option>
+        </select>
+        <input type="number" placeholder="AP Score" name="ap">
+        <input type="number" placeholder="IB Score" name="ib">
+        <input type="text" placeholder="Organization" name="org">
+        <button type="submit">Add Course</button>
+    </form>
 </body>
 </html>
