@@ -55,7 +55,41 @@ class ScheduleAdmin(admin.ModelAdmin):
 class Extracurricular(models.Model):
     name = models.CharField(max_length=1000)
     description = models.TextField()
-    position = models.CharField(max_length=1000, blank=True, null=True)   
+    position = models.CharField(max_length=1000, blank=True, null=True)
+    # volunteer
+
+    TYPE = [
+        (1, 'Academic'),
+        (2, 'Athletics: Club'),
+        (3, 'Athletics: JV/Varsity'),
+        (4, 'Career Oriented'),
+        (5, 'Community Service (Volunteer)'),
+        (6, 'Computer/Technology'),
+        (7, 'Cultural'),
+        (8, 'Dance'),
+        (9, 'Debate/Speech'),
+        (10, 'Environmental'),
+        (11, 'Family Responsibilities'),
+        (12, 'Foreign Exchange'),
+        (13, 'Foreign Language'),
+        (14, 'Internship'),
+        (15, 'Journalism/Publication'),
+        (16, 'Junior ROTC'),
+        (17, 'LGBTQIA+'),
+        (18, 'Music: Instrumental'),
+        (19, 'Music: Vocal'),
+        (20, 'Religious'),
+        (21, 'Research'),
+        (22, 'Robotics'),
+        (23, 'School Spirit'),
+        (24, 'Science/Math'),
+        (25, 'Social Justice'),
+        (26, 'Theater/Drama'),
+        (27, 'Work (Paid)'),
+        (28, 'Other Club/Activity'),
+    ]
+    type = models.IntegerField(default=9, choices=TYPE, blank=True, null=True)
+
     start_date = models.DateField(blank=True, null=True)  
     end_date = models.DateField(blank=True, null=True)
     def __str__(self):
@@ -69,13 +103,13 @@ class Award(models.Model):
         return self.name
 
 class User(models.Model):
-    fname = models.CharField(max_length=1000)
-    lname = models.CharField(max_length=1000)
+    fname = models.CharField(max_length=1000, blank=True, null=True)
+    lname = models.CharField(max_length=1000, blank=True, null=True)
     email = models.CharField(max_length=1000)
     password = models.CharField(max_length=1000)
     salt = models.CharField(max_length=1023, null=True)
 
-    school = models.CharField(max_length=1000)
+    school = models.CharField(max_length=1000, blank=True, null=True)
     GRADE = [
         (9, 'Freshman'),
         (10, 'Sophomore'),
@@ -178,7 +212,7 @@ class EssayDraft(models.Model):
 
 class College(models.Model):
     name = models.CharField(max_length=1000)
-    application_platform = models.URLField(max_length=1000)
+    application_platform = models.URLField(max_length=1000, blank=True, null=True)
     location = models.CharField(max_length=1000)
     tuition_cost = models.IntegerField()
     website = models.URLField(blank=True, null=True)  

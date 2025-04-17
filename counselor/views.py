@@ -168,59 +168,29 @@ def dashboard(request):
 def edit_profile(request):
     if not request.session.get('logged_in'):
         return redirect('/login')
-    else:
-        user = User.objects.get(email=request.session["email"])
-        context = {
-            'user' : user,
-        }
-        if request.method == "POST":
-            fname = request.POST.get('fname')
-            lname = request.POST.get('lname')
-            email = request.POST.get('email')
-            grade = request.POST.get('grade')
-            location = request.POST.get('location')
-            citizenship = request.POST.get('citizenship')
-            first_gen = request.POST.get('first_gen')
-            ethnicity = request.POST.get('ethnicity')
-            gender = request.POST.get('gender')
-            college_goals = request.POST.get('college_goals')
-            major_goals = request.POST.get('major_goals')
-            resume = request.FILES.get('resume')
-            class_rank = request.POST.get('class_rank')
-            class_size = request.POST.get('class_size')
-            psat = request.POST.get('psat')
-            sat = request.POST.get('sat')
-            act = request.POST.get('act')
-            school = request.POST.get('school')
 
-            inputs = [fname, lname, email, grade, location, citizenship, first_gen, ethnicity, gender, college_goals, major_goals, resume, class_rank, class_size, psat, sat, act, school]
+    user = User.objects.get(email=request.session["email"])
 
-            for i in range(len(inputs)):
-                if inputs[i] == "":
-                    inputs[i] = None               
+    if request.method == "POST":
+        fields = [
+            "fname", "lname", "email", "grade", "location", "citizenship_status",
+            "first_gen", "ethnicity", "gender", "college_goals", "major_goals",
+            "class_rank", "class_size", "psat", "sat", "act", "school"
+        ]
 
-            user.fname = inputs[0]
-            user.lname = inputs[1]
-            user.email = inputs[2]
-            user.grade = inputs[3]
-            user.location = inputs[4]
-            user.citizenship_status = inputs[5]
-            user.first_gen = inputs[6]
-            user.ethnicity = inputs[7]
-            user.gender = inputs[8]
-            user.college_goals = inputs[9]
-            user.major_goals = inputs[10]
-            user.resume = inputs[11]
-            user.class_rank = inputs[12]
-            user.class_size = inputs[13]
-            user.psat = inputs[14]
-            user.sat = inputs[15]
-            user.act = inputs[16]
-            user.school = inputs[17]
-            user.save()
+        for field in fields:
+            value = request.POST.get(field)
+            value = value if value != "" else None
+            setattr(user, model_field, value)
 
-        
-        return render(request, "edit_profile.html", context)
+        resume = request.FILES.get('resume')
+        if resume:
+            user.resume = resume
+
+        user.save()
+
+    return render(request, "edit_profile.html", {"user": user})
+
     
 def edit_schedule(request):
     if not request.session.get('logged_in'):
@@ -418,3 +388,58 @@ def edit_schedule(request):
             "senior_sched" : senior_sched
         }
         return render(request, "edit_schedule.html", context)
+
+def edit_extracurriculars(request):
+    if not request.session.get('logged_in'):
+        return redirect('/login')
+
+    user = User.objects.get(email=request.session["email"])
+
+    if request.method == "POST":
+        form_type = request.POST.get('form_type')
+
+        if form_type == "extracurricular":
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            position = request.POST.get('position')
+            type = request.POST.get('type')
+            start_date = request.POST.get('start_date')
+            end_date = request.POST.get('end_date')
+
+            ec, created = Extracurricular.objects.get_or_create(
+                name=name,
+                description=description,
+                defaults={
+                    'position': position,
+                    'type': type,
+                    'start_date': start_date or None,
+                    'end_date': end_date or None,
+                }
+            )
+
+            if not TakenEC.objects.filter(user=user, extracurricular=ec).exists():
+                TakenEC.objects.create(user=user, extracurricular=ec)
+
+        elif form_type == "award":
+            name = request.POST.get('award_name')
+            description = request.POST.get('award_description')
+            date_received = request.POST.get('date_received')
+
+            award, created = Award.objects.get_or_create(
+                name=name,
+                description=description,
+                defaults={'date_received': date_received or None}
+            )
+
+            if not WonAward.objects.filter(user=user, award=award).exists():
+                WonAward.objects.create(user=user, award=award)
+
+    extracurriculars = user.extracurriculars.all()
+    awards = user.awards.all()
+
+    return render(request, 'edit_extracurriculars.html', {
+        'extracurriculars': extracurriculars,
+        'awards': awards,
+        'extracurricular_types': Extracurricular.TYPE,
+    })
+
