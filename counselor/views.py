@@ -65,24 +65,32 @@ def signup(request):
                 fresh_sched.id_phrase = email+"_fresh"
                 fresh_sched.grade = 9
                 fresh_sched.grades = json.dumps({"sem1":{}, "sem2":{}})
+                fresh_sched.ap_scores = json.dumps({})
+                fresh_sched.ib_scores = json.dumps({})
                 fresh_sched.save()
                 user.freshman_schedule = fresh_sched
                 soph_sched = Schedule()
                 soph_sched.id_phrase = email+"_soph"
                 soph_sched.grade = 10
                 soph_sched.grades = json.dumps({"sem1":{}, "sem2":{}})
+                soph_sched.ap_scores = json.dumps({})
+                soph_sched.ib_scores = json.dumps({})
                 soph_sched.save()
                 user.sophomore_schedule = soph_sched
                 jun_sched = Schedule()
                 jun_sched.id_phrase = email+"_jun"
                 jun_sched.grade = 11
                 jun_sched.grades = json.dumps({"sem1":{}, "sem2":{}})
+                jun_sched.ap_scores = json.dumps({})
+                jun_sched.ib_scores = json.dumps({})
                 jun_sched.save()
                 user.junior_schedule = jun_sched
                 sen_sched = Schedule()
                 sen_sched.id_phrase = email+"_sen"
                 sen_sched.grade = 12
                 sen_sched.grades = json.dumps({"sem1":{}, "sem2":{}})
+                sen_sched.ap_scores = json.dumps({})
+                sen_sched.ib_scores = json.dumps({})
                 sen_sched.save()
                 user.senior_schedule = sen_sched
                 user.salt = salt
@@ -240,8 +248,6 @@ def edit_schedule(request):
                 else:
                     course = Course.objects.get(name=name, organization=org)
                 sched = user.freshman_schedule
-                print(type(sched))
-                print(type(sched.grades))
                 grades_json = json.loads(sched.grades)
                 print(grades_json)
                 grades_json["sem1"][name] = grade_1
@@ -283,7 +289,7 @@ def edit_schedule(request):
                 taken_course.course = course
                 taken_course.schedule = sched
                 taken_course.save()
-            if grade=="junior":
+            elif grade=="junior":
                 if not Course.objects.filter(name=name, organization=org).exists():
                     course = Course()
                     course.name = name
@@ -363,14 +369,8 @@ def edit_schedule(request):
             type  = course.type
             sem1_grade = json.loads(sched.grades)["sem1"][name]
             sem2_grade = json.loads(sched.grades)["sem2"][name]
-            if json.loads(sched.ap_scores)[name].exists():
-                ap = json.loads(sched.ap_scores)[name]
-            else:
-                ap = None
-            if json.loads(json.loads(sched.ib_scores)[name]):
-                ib = json.loads(sched.ib_scores)[name]
-            else:
-                ib = None
+            ap = json.loads(sched.ap_scores)[name]
+            ib = json.loads(sched.ib_scores)[name]
             org = course.organization
 
             freshman_sched.append(Course_Display(name, type, sem1_grade, sem2_grade, ap, ib, org))
@@ -381,14 +381,8 @@ def edit_schedule(request):
             type  = course.type
             sem1_grade = json.loads(sched.grades)["sem1"][name]
             sem2_grade = json.loads(sched.grades)["sem2"][name]
-            if json.loads(sched.ap_scores)[name].exists():
-                ap = json.loads(sched.ap_scores)[name]
-            else:
-                ap = None
-            if json.loads(json.loads(sched.ib_scores)[name]):
-                ib = json.loads(sched.ib_scores)[name]
-            else:
-                ib = None
+            ap = json.loads(sched.ap_scores)[name]
+            ib = json.loads(sched.ib_scores)[name]
             org = course.organization
 
             sophomore_sched.append(Course_Display(name, type, sem1_grade, sem2_grade, ap, ib, org))
@@ -399,14 +393,8 @@ def edit_schedule(request):
             type  = course.type
             sem1_grade = json.loads(sched.grades)["sem1"][name]
             sem2_grade = json.loads(sched.grades)["sem2"][name]
-            if json.loads(sched.ap_scores)[name].exists():
-                ap = json.loads(sched.ap_scores)[name]
-            else:
-                ap = None
-            if json.loads(json.loads(sched.ib_scores)[name]):
-                ib = json.loads(sched.ib_scores)[name]
-            else:
-                ib = None
+            ap = json.loads(sched.ap_scores)[name]
+            ib = json.loads(sched.ib_scores)[name]
             org = course.organization
 
             junior_sched.append(Course_Display(name, type, sem1_grade, sem2_grade, ap, ib, org))
@@ -417,14 +405,8 @@ def edit_schedule(request):
             type  = course.type
             sem1_grade = json.loads(sched.grades)["sem1"][name]
             sem2_grade = json.loads(sched.grades)["sem2"][name]
-            if json.loads(sched.ap_scores)[name].exists():
-                ap = json.loads(sched.ap_scores)[name]
-            else:
-                ap = None
-            if json.loads(json.loads(sched.ib_scores)[name]):
-                ib = json.loads(sched.ib_scores)[name]
-            else:
-                ib = None
+            ap = json.loads(sched.ap_scores)[name]
+            ib = json.loads(sched.ib_scores)[name]
             org = course.organization
 
             senior_sched.append(Course_Display(name, type, sem1_grade, sem2_grade, ap, ib, org))
