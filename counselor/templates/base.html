@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Django App{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Static CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- Bootstrap (optional) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        {% block header %}
+        <!-- Example Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">My App</a>
+            </div>
+        </nav>
+        {% endblock %}
+    </header>
+
+    <main class="container my-4">
+        {% block content %}
+        <!-- Main content goes here -->
+        {% endblock %}
+    </main>
+
+    <footer class="text-center text-muted py-3">
+        {% block footer %}
+        &copy; {{ year|default:"2025" }} My Django App
+        {% endblock %}
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
