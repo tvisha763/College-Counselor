@@ -452,6 +452,5 @@ def edit_extracurriculars(request):
     return render(request, 'edit_extracurriculars.html', {
         'extracurriculars': ec_display,
         'awards': awards,
-        'extracurricular_types': [Extracurricular.TYPE[1] for i in Extracurricular.TYPE],
     })
 
