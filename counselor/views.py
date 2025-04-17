@@ -434,12 +434,24 @@ def edit_extracurriculars(request):
             if not WonAward.objects.filter(user=user, award=award).exists():
                 WonAward.objects.create(user=user, award=award)
 
+    class Extracurricular_Display:
+        def __init__(self, name, description, position, type, start_date, end_date):
+            self.name = name
+            self.description = description
+            self.position = position
+            self.type = Extracurricular.TYPE[type-1][1]
+            self.start_date = start_date
+            self.end_date = end_date
+
     extracurriculars = user.extracurriculars.all()
     awards = user.awards.all()
+    ec_display = []
+    for ec in extracurriculars:
+        ec_display.append(Extracurricular_Display(ec.name, ec.description, ec.position, ec.type, ec.start_date, ec.end_date))
 
     return render(request, 'edit_extracurriculars.html', {
-        'extracurriculars': extracurriculars,
+        'extracurriculars': ec_display,
         'awards': awards,
-        'extracurricular_types': Extracurricular.TYPE,
+        'extracurricular_types': [Extracurricular.TYPE[1] for i in Extracurricular.TYPE],
     })
 
