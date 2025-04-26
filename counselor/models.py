@@ -56,7 +56,6 @@ class Extracurricular(models.Model):
     name = models.CharField(max_length=1000)
     description = models.TextField()
     position = models.CharField(max_length=1000, blank=True, null=True)
-    # volunteer
 
     TYPE = [
         (1, 'Academic'),
@@ -123,7 +122,7 @@ class User(models.Model):
         (1, 'Citizen'),
         (2, 'Permanent Resident'),
         (3, 'Visa'),
-        (4, 'International'),
+        (4, 'International')
     ]
     citizenship_status = models.IntegerField(default = 1, choices=CITIZENSHIP, blank=True, null=True)
 
@@ -217,7 +216,7 @@ class College(models.Model):
     location = models.CharField(max_length=1000)
     tuition_cost = models.IntegerField()
     website = models.URLField(blank=True, null=True)  
-    average_gpa = models.FloatField()  
+    average_gpa = models.FloatField(blank=True, null=True)  
     average_sat = models.IntegerField(blank=True, null=True)  
     average_act = models.IntegerField(blank=True, null=True)  
     def __str__(self):
