@@ -1,0 +1,4 @@
+openai
+django-environ
+htmx.org  # (for Django HTMX helpers)
+python-socketio  # (if we add real-time later)

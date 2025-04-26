@@ -1,4 +1,9 @@
-<h2>Edit Extracurriculars</h2>
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+Edit Extracurricular
+{% endblock title %}
+{% block content%}
 <form method="POST">
     {% csrf_token %}
     <input type="hidden" name="form_type" value="extracurricular">
@@ -24,3 +29,4 @@
     Date Received: <input type="date" name="date_received"><br>
     <button type="submit">Add Award</button>
 </form>
+{% endblock %}
