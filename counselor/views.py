@@ -168,29 +168,59 @@ def dashboard(request):
 def edit_profile(request):
     if not request.session.get('logged_in'):
         return redirect('/login')
+    else:
+        user = User.objects.get(email=request.session["email"])
+        context = {
+            'user' : user,
+        }
+        if request.method == "POST":
+            fname = request.POST.get('fname')
+            lname = request.POST.get('lname')
+            email = request.POST.get('email')
+            grade = request.POST.get('grade')
+            location = request.POST.get('location')
+            citizenship = request.POST.get('citizenship_status')
+            first_gen = request.POST.get('first_gen')
+            ethnicity = request.POST.get('ethnicity')
+            gender = request.POST.get('gender')
+            college_goals = request.POST.get('college_goals')
+            major_goals = request.POST.get('major_goals')
+            resume = request.FILES.get('resume')
+            class_rank = request.POST.get('class_rank')
+            class_size = request.POST.get('class_size')
+            psat = request.POST.get('psat')
+            sat = request.POST.get('sat')
+            act = request.POST.get('act')
+            school = request.POST.get('school')
 
-    user = User.objects.get(email=request.session["email"])
+            inputs = [fname, lname, email, grade, location, citizenship, first_gen, ethnicity, gender, college_goals, major_goals, resume, class_rank, class_size, psat, sat, act, school]
 
-    if request.method == "POST":
-        fields = [
-            "fname", "lname", "email", "grade", "location", "citizenship_status",
-            "first_gen", "ethnicity", "gender", "college_goals", "major_goals",
-            "class_rank", "class_size", "psat", "sat", "act", "school"
-        ]
+            for i in range(len(inputs)):
+                if inputs[i] == "":
+                    inputs[i] = None               
 
-        for field in fields:
-            value = request.POST.get(field)
-            value = value if value != "" else None
-            setattr(user, model_field, value)
+            user.fname = inputs[0]
+            user.lname = inputs[1]
+            user.email = inputs[2]
+            user.grade = inputs[3]
+            user.location = inputs[4]
+            user.citizenship_status = inputs[5]
+            user.first_gen = inputs[6]
+            user.ethnicity = inputs[7]
+            user.gender = inputs[8]
+            user.college_goals = inputs[9]
+            user.major_goals = inputs[10]
+            user.resume = inputs[11]
+            user.class_rank = inputs[12]
+            user.class_size = inputs[13]
+            user.psat = inputs[14]
+            user.sat = inputs[15]
+            user.act = inputs[16]
+            user.school = inputs[17]
+            user.save()
 
-        resume = request.FILES.get('resume')
-        if resume:
-            user.resume = resume
-
-        user.save()
-
-    return render(request, "edit_profile.html", {"user": user})
-
+        
+        return render(request, "edit_profile.html", context)
     
 def edit_schedule(request):
     if not request.session.get('logged_in'):
@@ -434,12 +464,23 @@ def edit_extracurriculars(request):
             if not WonAward.objects.filter(user=user, award=award).exists():
                 WonAward.objects.create(user=user, award=award)
 
+    class Extracurricular_Display:
+        def __init__(self, name, description, position, type, start_date, end_date):
+            self.name = name
+            self.description = description
+            self.position = position
+            self.type = Extracurricular.TYPE[type-1][1]
+            self.start_date = start_date
+            self.end_date = end_date
+
     extracurriculars = user.extracurriculars.all()
     awards = user.awards.all()
+    ec_display = []
+    for ec in extracurriculars:
+        ec_display.append(Extracurricular_Display(ec.name, ec.description, ec.position, ec.type, ec.start_date, ec.end_date))
 
     return render(request, 'edit_extracurriculars.html', {
-        'extracurriculars': extracurriculars,
+        'extracurriculars': ec_display,
         'awards': awards,
-        'extracurricular_types': Extracurricular.TYPE,
     })
 

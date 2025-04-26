@@ -14,11 +14,14 @@
         {% for message in messages %}
             {{ message }}
         {% endfor %}
-  
+
+        <input type="text" placeholder="First Name" name="fname" value="{{user.fname}}">
+        <input type="text" placeholder="Last Name" name="lname" value="{{user.lname}}">
+        <input type="email" placeholder="Email" name="email" value="{{user.email}}">
         <input type="text" placeholder="School" name="school" value="{{ user.school }}">
 
         <select name="grade">
-            <option value="" {% if not user.grade %}selected{% endif %}>Grade</option>
+            <option value="" {% if user.grade != 9 and user.grade != 10 and user.grade != 11 and user.grade != 12 %}selected{% endif %}>Grade</option>
             <option value="9" {% if user.grade == 9 %}selected{% endif %}>Freshman</option>
             <option value="10" {% if user.grade == 10 %}selected{% endif %}>Sophomore</option>
             <option value="11" {% if user.grade == 11 %}selected{% endif %}>Junior</option>
@@ -28,14 +31,15 @@
         <input type="text" placeholder="Location" name="location" value="{{ user.location }}">
 
         <select name="citizenship_status">
-            <option value="" {% if not user.citizenship_status %}selected{% endif %}>Citizenship Status</option>
+            <option value="" {% if user.citizenship_status != 1 and user.citizenship_status != 2 and user.citizenship_status != 3 and user.citizenship_status != 4 %}selected{% endif %}>Citizenship Status</option>
             <option value="1" {% if user.citizenship_status == 1 %}selected{% endif %}>Citizen</option>
             <option value="2" {% if user.citizenship_status == 2 %}selected{% endif %}>Permanent Resident</option>
-            <option value="3" {% if user.citizenship_status == 3 %}selected{% endif %}>International</option>
+            <option value="3" {% if user.citizenship_status == 3 %}selected{% endif %}>Visa</option>
+            <option value="4" {% if user.citizenship_status == 4 %}selected{% endif %}>International</option>
         </select>
 
         <select name="first_gen">
-            <option value="" {% if not user.first_gen %}selected{% endif %}>First Generation Status</option>
+            <option value="" {% if user.first_gen != 1 and user.first_gen != 2 %}selected{% endif %}>First Generation Status</option>
             <option value="1" {% if user.first_gen == 1 %}selected{% endif %}>Not First Generation</option>
             <option value="2" {% if user.first_gen == 2 %}selected{% endif %}>First Generation</option>
         </select>

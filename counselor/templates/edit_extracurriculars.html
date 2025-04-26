@@ -1,32 +1,50 @@
-{% extends "base.html" %}
-{% load static %}
-{% block title %}
-Edit Extracurricular
-{% endblock title %}
-{% block content%}
-<form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="form_type" value="extracurricular">
-    Name: <input type="text" name="name"><br>
-    Description: <textarea name="description"></textarea><br>
-    Position: <input type="text" name="position"><br>
-    Type: <select name="type">
-        {% for code, label in extracurricular_types %}
-        <option value="{{ code }}">{{ label }}</option>
-        {% endfor %}
-    </select><br>
-    Start Date: <input type="date" name="start_date"><br>
-    End Date: <input type="date" name="end_date"><br>
-    <button type="submit">Add Extracurricular</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit ECs and Awards</title>
+</head>
+<body>
+    <h2>Edit Extracurriculars</h2>
+    {% for EC in extracurriculars %}
+        {{ EC.name }}
+        {{ EC.description }}
+        {{ EC.position }}
+        {{ EC.type }}
+        {{ EC.start_date }}
+        {{ EC.end_date }}
+    {% endfor %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="extracurricular">
+        Name: <input type="text" name="name"><br>
+        Description: <textarea name="description"></textarea><br>
+        Position: <input type="text" name="position"><br>
+        Type: <select name="type">
+            {% for code, label in extracurricular_types %}
+            <option value="{{ code }}">{{ label }}</option>
+            {% endfor %}
+        </select><br>
+        Start Date: <input type="date" name="start_date"><br>
+        End Date: <input type="date" name="end_date"><br>
+        <button type="submit">Add Extracurricular</button>
+    </form>
 
-<h2>Edit Awards</h2>
-<form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="form_type" value="award">
-    Name: <input type="text" name="award_name"><br>
-    Description: <textarea name="award_description"></textarea><br>
-    Date Received: <input type="date" name="date_received"><br>
-    <button type="submit">Add Award</button>
-</form>
-{% endblock %}
+    <h2>Edit Awards</h2>
+    {% for award in awards %}
+        {{ award.name }}
+        {{ award.description }}
+        {{ award.date_recieved }}
+    {% endfor %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="award">
+        Name: <input type="text" name="award_name"><br>
+        Description: <textarea name="award_description"></textarea><br>
+        Date Received: <input type="date" name="date_received"><br>
+        <button type="submit">Add Award</button>
+    </form>
+
+</body>
+</html>

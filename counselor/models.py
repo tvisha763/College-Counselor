@@ -122,7 +122,8 @@ class User(models.Model):
     CITIZENSHIP = [
         (1, 'Citizen'),
         (2, 'Permanent Resident'),
-        (3, 'International')
+        (3, 'Visa'),
+        (4, 'International'),
     ]
     citizenship_status = models.IntegerField(default = 1, choices=CITIZENSHIP, blank=True, null=True)
 
