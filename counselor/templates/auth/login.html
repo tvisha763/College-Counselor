@@ -7,7 +7,7 @@
     <title>Log In</title>
 </head>
 <body>
-    <form action="{% url 'login' %}" method="POST">
+    <form action="{% url 'counselor:login' %}" method="POST">
         {% csrf_token %}
         {% for message in messages %}
             {{ message }}

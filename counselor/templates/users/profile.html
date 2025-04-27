@@ -7,5 +7,5 @@
 <p><strong>Location:</strong> {{ user.location }}</p>
 <p><strong>Grade:</strong> {{ user.get_grade_display }}</p>
 <p><strong>Phone:</strong> {{ user.phone_number }}</p>
-<p><a href="{% url 'update_user' %}">Edit Profile</a></p>
+<p><a href="{% url 'counselor:update_user' %}">Edit Profile</a></p>
 {% endblock %}

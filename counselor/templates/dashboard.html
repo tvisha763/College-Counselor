@@ -8,8 +8,9 @@
 </head>
 <body>
     <h1>Welcome To Your AI College Counselor</h1>
-    <a href="{% url 'edit_profile' %}">Edit Your Profile</a>
-    <a href="{% url 'edit_schedule' %}">Edit Your Schedule</a>
-    <a href="{% url 'edit_extracurriculars' %}">Edit Extracurriculars and Awards</a>
+    <a href="{% url 'counselor:edit_profile' %}">Edit Your Profile</a>
+    <a href="{% url 'counselor:edit_schedule' %}">Edit Your Schedule</a>
+    <a href="{% url 'counselor:edit_extracurriculars' %}">Edit Extracurriculars and Awards</a>
+    {% include 'chat_widget.html' %}
 </body>
 </html>

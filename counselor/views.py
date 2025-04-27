@@ -35,24 +35,24 @@ def signup(request):
 
             if (password != confirmPass):
                 messages.error(request, "The passwords do not match.")
-                return redirect('signup')
+                return redirect('counselor:signup')
 
             for inp in inputs:
                 if inp == '':
                     messages.error(request, "Please input all the information.")
-                    return redirect('signup')
+                    return redirect('counselor:signup')
 
             if password != '' and len(password) < 6:
                 messages.error(request, "Your password must be at least 6 charecters.")
-                return redirect('signup')
+                return redirect('counselor:signup')
 
             if "@" not in email:
                 messages.error(request, "Please enter your email address.")
-                return redirect('signup')
+                return redirect('counselor:signup')
 
             if User.objects.filter(email=email).exists():
                 messages.error(request, "An account with this email already exists. If this is you, please log in.")
-                return redirect('signup')
+                return redirect('counselor:signup')
 
             else:
                 salt = bcrypt.gensalt()
@@ -96,12 +96,12 @@ def signup(request):
                 user.salt = salt
                 user.save()
                 user = User.objects.get(email=email)
-                return redirect('login')
+                return redirect('counselor:login')
         else:
             if request.session.get('logged_in'):
-                return redirect('/login')
+                return redirect('counselor:login')
     else:
-        return redirect('dashboard')
+        return redirect('counselor:dashboard')
 
     return render(request, 'auth/signup.html')
 
@@ -116,7 +116,7 @@ def login(request):
             for inp in inputs:
                 if inp == '':
                     messages.error(request, "Please input all the information.")
-                    return redirect('login')
+                    return redirect('counselor:login')
 
             
 
@@ -129,26 +129,26 @@ def login(request):
             
                 salted_password = bcrypt.hashpw(password, saved_salt)
                 if salted_password == saved_hashed_pass:
-                    return redirect('dashboard')
+                    return redirect('counselor:dashboard')
                 else:
                     messages.error(request, "Your password is incorrect.")
-                    return redirect('login')
+                    return redirect('counselor:login')
 
             else:
                 messages.error(request, "An account with this email does not exist. Please sign up.")
-                return redirect('login')
+                return redirect('counselor:login')
 
         else:
             if request.session.get('logged_in'):
-                return redirect('/login')
+                return redirect('counselor:login')
 
         return render(request, 'auth/login.html')
     else:
-        return redirect('dashboard')
+        return redirect('counselor:dashboard')
 
 def logout(request):
     if not request.session.get('logged_in') or not request.session.get('email'):
-        return redirect('/login')
+        return redirect('counselor:login')
     else:
         request.session["email"] = None
         request.session['logged_in'] = False
@@ -161,13 +161,13 @@ def home(request):
 
 def dashboard(request):
     if not request.session.get('logged_in'):
-        return redirect('/login')
+        return redirect('counselor:login')
     else:
         return render(request, "dashboard.html")
     
 def edit_profile(request):
     if not request.session.get('logged_in'):
-        return redirect('/login')
+        return redirect('counselor:login')
     else:
         user = User.objects.get(email=request.session["email"])
         context = {
@@ -224,7 +224,7 @@ def edit_profile(request):
     
 def edit_schedule(request):
     if not request.session.get('logged_in'):
-        return redirect('/login')
+        return redirect('counselor:login')
     else:
         user = User.objects.get(email=request.session["email"])
         if request.method == "POST":
@@ -421,7 +421,7 @@ def edit_schedule(request):
 
 def edit_extracurriculars(request):
     if not request.session.get('logged_in'):
-        return redirect('/login')
+        return redirect('counselor:login')
 
     user = User.objects.get(email=request.session["email"])
 

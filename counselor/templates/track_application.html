@@ -6,8 +6,11 @@
     <title>Track Application</title>
 </head>
 <body>
-    <form action="{% url 'add_college' %}" >
+    <form action="{% url 'counselor:add_college' %}" >
         
     </form>
+
+
+    {% include 'chat_widget.html' %}
 </body>
 </html>

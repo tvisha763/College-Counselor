@@ -1,0 +1,39 @@
+<div id="chat-box">
+    <!-- messages will be appended here -->
+</div>
+
+<form id="chat-form">
+    {% csrf_token %}
+    <input type="text" id="chat-input" name="message" placeholder="Say something..." required>
+    <button type="submit">Send</button>
+</form>
+
+<script>
+document.getElementById('chat-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    let message = document.getElementById('chat-input').value;
+    let pageIdentifier = "{{ page_identifier }}";
+
+    const response = await fetch("{% url 'counselor_chat:chat' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `message=${encodeURIComponent(message)}&page_identifier=${encodeURIComponent(pageIdentifier)}`
+    });
+
+    const data = await response.json();
+    appendToChat(message, "user");
+    appendToChat(data.reply, "assistant");
+    document.getElementById('chat-input').value = "";
+});
+
+function appendToChat(message, sender) {
+    const chatBox = document.getElementById('chat-box');
+    const newMessage = document.createElement('div');
+    newMessage.className = sender;
+    newMessage.innerText = sender + ": " + message;
+    chatBox.appendChild(newMessage);
+}
+</script>

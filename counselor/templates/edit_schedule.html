@@ -17,7 +17,7 @@
         {{ class.ib }}
         {{ class.org }}
     {% endfor %}
-    <form action="{% url 'edit_schedule' %}" method="POST">
+    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="grade" value="freshman">
         <input type="text" placeholder="Class Name" name="name">
@@ -181,5 +181,7 @@
         <input type="text" placeholder="Organization" name="org">
         <button type="submit">Add Course</button>
     </form>
+
+{% include 'chat_widget.html' %}
 </body>
 </html>
