@@ -6,6 +6,8 @@ from .models import ChatHistory
 from .utils import store_in_session, get_session_history
 from .system_prompts import generate_system_prompt
 
+from counselor.models import User
+
 @csrf_exempt
 def chat_view(request):
     if request.method == "POST":
@@ -13,11 +15,13 @@ def chat_view(request):
         page_identifier = request.POST.get("page_identifier")
         system_prompt = generate_system_prompt(page_identifier)
 
-        # TESTING
-        return JsonResponse({"reply": "pong\n" + user_input + "\n" + system_prompt})
+        # # TESTING
+        # return JsonResponse({"reply": "pong\n" + user_input + "\n" + system_prompt})
+
+        user_instance =  user = User.objects.get(email=request.session["email"])
 
         past_messages = ChatHistory.objects.filter(
-            user=request.user,
+            user=user_instance,
             page_identifier=page_identifier
         ).order_by('timestamp')
 
@@ -27,13 +31,13 @@ def chat_view(request):
         ai_reply = chat_service.chat(user_input)
 
         ChatHistory.objects.create(
-            user=request.user,
+            user=user_instance,
             page_identifier=page_identifier,
             role='user',
             message=user_input
         )
         ChatHistory.objects.create(
-            user=request.user,
+            user=user_instance,
             page_identifier=page_identifier,
             role='assistant',
             message=ai_reply

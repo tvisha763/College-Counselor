@@ -60,8 +60,20 @@
 </style>
 
 <script>
+
+let isCoolDown = false;
+let chatDelay = 1500;
+
 document.getElementById('chat-form').addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    if (isCoolDown) {
+      alert('Please wait a few seconds before sending another message.');
+      return;
+    }
+    isCoolDown = true;
+    setTimeout(() => { isCoolDown = false; }, chatDelay);
+
     let message = document.getElementById('chat-input').value;
     let pageIdentifier = "{{ page_identifier }}";
     console.log(pageIdentifier);
@@ -76,6 +88,7 @@ document.getElementById('chat-form').addEventListener('submit', async function(e
     });
 
     const data = await response.json();
+
     appendToChat(message, "user", "");
     appendToChat(data.reply, "assistant", pageIdentifier);
     document.getElementById('chat-input').value = "";
