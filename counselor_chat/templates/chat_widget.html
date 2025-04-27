@@ -8,11 +8,63 @@
     <button type="submit">Send</button>
 </form>
 
+<style>
+    #chat-box {
+        width: 100%;
+        max-width: 10000px;
+        margin: 20px auto;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        overflow-y: auto;
+        max-height: 400px;
+        scroll-behavior: smooth;
+    }
+
+    #chat-box .user {
+        background-color: #badd1e;
+        color: #ffffff;
+        text-align: left;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 5px 0;
+        max-width: 35%;
+        margin-left: 60%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #chat-box .assistant {
+        background-color: #f0f0f0;
+        color: #333;
+        text-align: left;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 5px 0;
+        max-width: 55%;
+        margin-right: 40%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .timestamp {
+        font-size: 0.8em;
+        color: #888;
+        margin-left: 10px;
+        text-align: right;
+        display: block;
+    }
+
+    #chat-box .user:hover, #chat-box .assistant:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: box-shadow 0.3s ease;
+    }
+</style>
+
 <script>
 document.getElementById('chat-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     let message = document.getElementById('chat-input').value;
     let pageIdentifier = "{{ page_identifier }}";
+    console.log(pageIdentifier);
 
     const response = await fetch("{% url 'counselor_chat:chat' %}", {
         method: 'POST',
@@ -24,16 +76,25 @@ document.getElementById('chat-form').addEventListener('submit', async function(e
     });
 
     const data = await response.json();
-    appendToChat(message, "user");
-    appendToChat(data.reply, "assistant");
+    appendToChat(message, "user", "");
+    appendToChat(data.reply, "assistant", pageIdentifier);
     document.getElementById('chat-input').value = "";
 });
 
-function appendToChat(message, sender) {
+
+function appendToChat(message, sender, page_id) {
     const chatBox = document.getElementById('chat-box');
     const newMessage = document.createElement('div');
-    newMessage.className = sender;
-    newMessage.innerText = sender + ": " + message;
+    newMessage.className = sender; 
+    const messageContent = document.createElement('span');
+    messageContent.innerText = message;
+    const timestamp = document.createElement('span');
+    timestamp.className = 'timestamp';
+    timestamp.innerText = new Date().toLocaleTimeString();
+    newMessage.appendChild(messageContent);
+    newMessage.appendChild(timestamp);
+    newMessage.pageIdentifier = page_id;
     chatBox.appendChild(newMessage);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 </script>
