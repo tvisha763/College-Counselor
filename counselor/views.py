@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import User, Course, Schedule, TakenCourse, Extracurricular, Award, Message, TakenEC, WonAward, EssayDraft, College, CollegeApplication, Scholarship
+from .models import User, Course, Schedule, TakenCourse, Extracurricular, Award, TakenEC, WonAward, EssayDraft, College, CollegeApplication, Scholarship
 import bcrypt
 import requests
 import urllib

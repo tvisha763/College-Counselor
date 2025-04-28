@@ -160,20 +160,6 @@ class User(models.Model):
     def __str__(self):
         return self.fname + ' ' + self.lname
 
-class Message(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    SENDER = [
-        (1, "User"),
-        (2, "General Chat"),
-        (3, "Tutor Chat"),
-        (4, "Essay Chat")
-    ]
-    sender = models.IntegerField(default=1, choices=SENDER, blank=True, null=True)
-    chat = models.CharField(max_length=1000)
-    message = models.TextField()
-    def __str__(self):
-        return '%s - %s' % (self.sender, self.chat)
-
 class TakenEC(models.Model):
     extracurricular = models.ForeignKey(Extracurricular, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
