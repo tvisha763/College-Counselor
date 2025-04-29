@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import User, Course, Schedule, Extracurricular, Award, EssayDraft, College, CollegeApplication, Scholarship, CourseAdmin, ScheduleAdmin, UserAdmin, ECAdmin, AwardAdmin
-
+from .models import *
 
 # Register your models here.
 admin.site.register(User, UserAdmin)
