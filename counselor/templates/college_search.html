@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Search</title>
+</head>
+<body>
+    Suggestions
+    {% for college in colleges %}
+        {{ college.name }}
+        <form action="{% url 'counselor:add_college' %}" method="GET">
+            {% csrf_token %}
+            <input type="hidden" name="college_name" value="{{ college.name }}">
+            <button type="submit">Add College</button>
+        </form>
+    {% endfor %}
+    Search
+    <form action="{% url 'counselor:college_search' %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="search">
+        <button type="submit">Search</button>
+    </form>
+    {% for result in search_results %}
+        {{ result.name }}
+        <form action="{% url 'counselor:add_college' %}" method="GET">
+            {% csrf_token %}
+            <input type="hidden" name="college_name" value="{{ result.name }}">
+            <button type="submit">Add College</button>
+        </form>
+    {% endfor %}
+</body>
+</html>
