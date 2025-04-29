@@ -2,7 +2,7 @@ from contextvars import Context
 from operator import contains
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import User, Course, Schedule, TakenCourse, Extracurricular, Award, TakenEC, WonAward, EssayDraft, CollegeApplication, Scholarship
 import bcrypt
@@ -19,6 +19,8 @@ from django.templatetags.static import static
 from openai import OpenAI
 import ast
 from rapidfuzz import process, fuzz
+from django.utils.dateparse import parse_date
+
 
 # Create your views here.
 
@@ -167,8 +169,13 @@ def home(request):
 def dashboard(request):
     if not request.session.get('logged_in'):
         return redirect('counselor:login')
-    else:
-        return render(request, "dashboard.html")
+
+    user = User.objects.get(email=request.session["email"])
+    applications = CollegeApplication.objects.filter(user=user)
+
+    return render(request, "dashboard.html", {
+        "applications": applications
+    })
     
 def edit_profile(request):
     if not request.session.get('logged_in'):
@@ -505,7 +512,7 @@ common_words = ['University', 'College', 'Of', 'At', 'The', 'Institute', 'School
 def clean_name(name):
     return ' '.join([word for word in name.split() if word not in common_words])
 
-
+@csrf_exempt
 def college_search(request):
     if not request.session.get('logged_in'):
         return redirect('counselor:login')
@@ -685,3 +692,109 @@ def add_college(request):
             )
         app.save()
         return redirect('counselor:college_search')
+    
+def track_application(request, app_id):
+    if not request.session.get('logged_in'):
+        return redirect('counselor:login')
+
+    user = User.objects.get(email=request.session["email"])
+    application = get_object_or_404(CollegeApplication, id=app_id, user=user)
+
+    if request.method == "POST":
+        # Mark as finished
+        if "mark_finished" in request.POST:
+            application.application_status = 2
+            application.save()
+            return redirect('counselor:track_application', app_id=app_id)
+
+        # Save or update essay draft
+        elif request.POST.get("save_draft_only"):
+            prompt = request.POST.get("prompt")
+            draft_text = request.POST.get("draft")
+            draft_id = request.POST.get("edit_draft_id")  # ✅ Fixed name
+
+            if draft_id:
+                draft = get_object_or_404(EssayDraft, id=draft_id, user=user, application=application)
+                draft.prompt = prompt
+                draft.draft = draft_text
+                draft.save()
+            elif prompt and draft_text:
+                EssayDraft.objects.create(
+                    user=user,
+                    application=application,
+                    prompt=prompt,
+                    draft=draft_text
+                )
+            return redirect('counselor:track_application', app_id=app_id)
+
+        # Update application info
+        application.major = request.POST.get("major", "")
+        application.alt_major = request.POST.get("alt_major", "")
+        application.application_type = int(request.POST.get("application_type", 1))
+        application.chance = int(request.POST.get("chance", 1))
+        application.deadline = parse_date(request.POST.get("deadline")) if request.POST.get("deadline") else None
+        application.location = int(request.POST.get("location", 1))
+        application.rec_letter_status = 2 if request.POST.get("rec_letter_status") else 1
+        application.general_questions_status = 2 if request.POST.get("general_questions_status") else 1
+        application.grade_report_status = 2 if request.POST.get("grade_report_status") else 1
+        application.SAT_ACT_score_status = 2 if request.POST.get("SAT_ACT_score_status") else 1
+        application.scholarship_application_status = 2 if request.POST.get("scholarship_application_status") else 1
+        application.FAFSA_application_status = 2 if request.POST.get("FAFSA_application_status") else 1
+
+        if application.application_status != 2:
+            application.application_status = 1
+
+        application.save()
+        return redirect('counselor:track_application', app_id=app_id)
+
+    essay_drafts = EssayDraft.objects.filter(application=application)
+
+    return render(request, 'track_application.html', {
+        'application': application,
+        'essay_drafts': essay_drafts
+    })
+
+
+
+@csrf_exempt
+def analyze_essay(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        text = data.get("text", "")
+
+        print("📨 Received text:", text)  # Debug incoming text
+
+        system_prompt = """
+            You are an expert college admissions counselor.
+            Highlight important parts of the student's college essay and give suggestions for improvement.
+            Return a JSON array with the format:
+            [
+            {"text": "important phrase", "suggestion": "explanation or suggestion"},
+            ...
+            ]
+            Only include relevant suggestions. Do not summarize or add fluff.
+        """
+
+        try:
+            client = OpenAI(api_key=settings.OPENAI_API_KEY)
+            response = client.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.4,
+            )
+
+            raw_content = response.choices[0].message.content.strip()
+            print("🧠 GPT raw content:", raw_content)
+
+            import re, json
+            json_match = re.search(r'\[\s*{.*?}\s*\]', raw_content, re.DOTALL)
+            feedback = json.loads(json_match.group()) if json_match else []
+
+            print("✅ Final highlights:", feedback)
+            return JsonResponse({"highlights": feedback})
+        except Exception as e:
+            print("❌ Error in analyze_essay:", str(e))
+            return JsonResponse({"error": str(e)}, status=500)

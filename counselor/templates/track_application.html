@@ -1,16 +1,324 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Application</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* Main Styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h2, h3 {
+            color: #2c3e50;
+        }
+        
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        textarea {
+            min-height: 100px;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        hr {
+            margin: 20px 0;
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Essay Draft Styles */
+        .essay-feedback {
+            min-height: 200px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        
+        /* Highlight Tooltip Styles */
+        .highlight-tooltip {
+            background-color: #FFEB3B;
+            border-bottom: 1px dashed #FF5722;
+            cursor: help;
+            position: relative;
+        }
+        
+        .highlight-tooltip:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 100;
+            min-width: 200px;
+            max-width: 400px;
+        }
+        
+        /* Status Colors */
+        .status-complete {
+            color: green;
+        }
+        
+        .status-in-progress {
+            color: orange;
+        }
+    </style>
 </head>
 <body>
-    <form action="{% url 'counselor:add_college' %}" >
-        
+    <h2>Tracking Application for {{ application.college }}</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Major:</label>
+        <input type="text" name="major" value="{{ application.major }}">
+
+        <label>Alt Major:</label>
+        <input type="text" name="alt_major" value="{{ application.alt_major }}">
+
+        <label>Application Type:</label>
+        <select name="application_type">
+            {% for val, label in application.TYPE %}
+                <option value="{{ val }}" {% if val == application.application_type %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Chance Level:</label>
+        <select name="chance">
+            {% for val, label in application.CHANCE %}
+                <option value="{{ val }}" {% if val == application.chance %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Deadline:</label>
+        <input type="date" name="deadline" value="{{ application.deadline|date:'Y-m-d' }}">
+
+        <label>Location:</label>
+        <select name="location">
+            {% for val, label in application.LOCATION %}
+                <option value="{{ val }}" {% if val == application.location %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Status Checkboxes -->
+        <label><input type="checkbox" name="rec_letter_status" value="2" {% if application.rec_letter_status == 2 %}checked{% endif %}> Recommendation Letter Complete</label>
+
+        <label><input type="checkbox" name="general_questions_status" value="2" {% if application.general_questions_status == 2 %}checked{% endif %}> General Questions Complete</label>
+
+        <label><input type="checkbox" name="grade_report_status" value="2" {% if application.grade_report_status == 2 %}checked{% endif %}> Grade Report Complete</label>
+
+        <label><input type="checkbox" name="SAT_ACT_score_status" value="2" {% if application.SAT_ACT_score_status == 2 %}checked{% endif %}> SAT/ACT Scores Complete</label>
+
+        <label><input type="checkbox" name="scholarship_application_status" value="2" {% if application.scholarship_application_status == 2 %}checked{% endif %}> Scholarship Application Complete</label>
+
+        <label><input type="checkbox" name="FAFSA_application_status" value="2" {% if application.FAFSA_application_status == 2 %}checked{% endif %}> FAFSA Application Complete</label>
+
+        <p><strong>Current Status:</strong> 
+            {% if application.application_status == 2 %}
+                <span class="status-complete">Submitted</span>
+            {% else %}
+                <span class="status-in-progress">In Progress</span>
+            {% endif %}
+        </p>
+
+        <button type="submit">Save Tracking Info</button>
     </form>
 
+    {% if application.application_status != 2 %}
+        <form method="POST" style="margin-top: 20px;">
+            {% csrf_token %}
+            <input type="hidden" name="mark_finished" value="1">
+            <button type="submit">Mark as Finished</button>
+        </form>
+    {% endif %}
+
+    <hr>
+
+    <h3>Essay Drafts</h3>
+    {% for draft in essay_drafts %}
+        <form method="POST" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
+            {% csrf_token %}
+            <input type="hidden" name="edit_draft_id" value="{{ draft.id }}">
+            <label>Prompt:</label>
+            <textarea name="prompt" rows="2" cols="100">{{ draft.prompt }}</textarea>
+
+            <label>Draft:</label>
+            <div class="essay-feedback" contenteditable="true" data-draft-id="{{ draft.id }}">{{ draft.draft|safe }}</div>
+            <input type="hidden" name="draft" class="draft-hidden-input">
+
+            <button type="submit" name="save_draft_only" value="1">Save Changes</button>
+        </form>
+    {% endfor %}
+
+    <!-- Add New Draft -->
+    <h3>Add New Essay Draft</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <label>Prompt:</label>
+        <textarea name="prompt" rows="2" cols="100"></textarea>
+
+        <label>Draft:</label>
+        <textarea name="draft" rows="6" cols="100"></textarea>
+
+        <button type="submit" name="save_draft_only" value="1">Add Draft</button>
+    </form>
 
     {% include 'chat_widget.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Process all essay feedback divs
+            document.querySelectorAll('.essay-feedback').forEach(contentDiv => {
+                // Save original content to restore if analysis fails
+                const originalContent = contentDiv.innerHTML;
+                
+                // Handle blur event for analysis
+                contentDiv.addEventListener('blur', function() {
+                    const textContent = this.innerText.trim();
+                    
+                    if (textContent.length < 10) return;
+                    
+                    // Show loading state
+                    this.innerHTML = originalContent + '<div style="color:#999;font-style:italic;">Analyzing essay...</div>';
+                    
+                    fetch("{% url 'counselor:analyze_essay' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrftoken }}"
+                        },
+                        body: JSON.stringify({ text: textContent })
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Analysis failed');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data.highlights || data.highlights.length === 0) {
+                            this.innerHTML = originalContent;
+                            return;
+                        }
+                        
+                        // Create a temporary div to work with the HTML
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = originalContent;
+                        const textNodes = [];
+                        
+                        // Find all text nodes (ignoring HTML tags)
+                        const walker = document.createTreeWalker(
+                            tempDiv, 
+                            NodeFilter.SHOW_TEXT, 
+                            null, 
+                            false
+                        );
+                        
+                        let node;
+                        while(node = walker.nextNode()) {
+                            textNodes.push(node);
+                        }
+                        
+                        // Process each highlight
+                        data.highlights.forEach(item => {
+                            textNodes.forEach(textNode => {
+                                const text = textNode.nodeValue;
+                                const highlightedText = text.replace(
+                                    new RegExp(escapeRegExp(item.text), 
+                                    `<span class="highlight-tooltip" title="${escapeHtml(item.suggestion)}">$&</span>`
+                                );
+                                
+                                if (highlightedText !== text) {
+                                    const newSpan = document.createElement('span');
+                                    newSpan.innerHTML = highlightedText;
+                                    textNode.parentNode.replaceChild(newSpan, textNode);
+                                }
+                            });
+                        });
+                        
+                        // Update the content
+                        this.innerHTML = tempDiv.innerHTML;
+                    })
+                    .catch(err => {
+                        console.error("Error:", err);
+                        this.innerHTML = originalContent;
+                    });
+                });
+                
+                // Handle form submission
+                const form = contentDiv.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function() {
+                        const hiddenInput = this.querySelector('.draft-hidden-input');
+                        if (hiddenInput) {
+                            hiddenInput.value = contentDiv.innerHTML.trim();
+                        }
+                    });
+                }
+            });
+            
+            // Helper functions
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+            
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        });
+        </script>
 </body>
 </html>

@@ -8,9 +8,28 @@
 </head>
 <body>
     <h1>Welcome To Your AI College Counselor</h1>
-    <a href="{% url 'counselor:edit_profile' %}">Edit Your Profile</a>
-    <a href="{% url 'counselor:edit_schedule' %}">Edit Your Schedule</a>
-    <a href="{% url 'counselor:edit_extracurriculars' %}">Edit Extracurriculars and Awards</a>
+
+    <a href="{% url 'counselor:edit_profile' %}">Edit Your Profile</a><br>
+    <a href="{% url 'counselor:edit_schedule' %}">Edit Your Schedule</a><br>
+    <a href="{% url 'counselor:edit_extracurriculars' %}">Edit Extracurriculars and Awards</a><br>
+    <a href="{% url 'counselor:college_search' %}">College Search</a><br>
+
+    <h2>Your College Applications</h2>
+    {% if applications %}
+        <ul>
+            {% for app in applications %}
+                <li>
+                    <a href="{% url 'counselor:track_application' app.id %}">
+                        {{ app.college }} — {{ app.get_application_status_display }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't added any applications yet.</p>
+    {% endif %}
+
     {% include 'chat_widget.html' %}
+
 </body>
 </html>

@@ -11,5 +11,7 @@ urlpatterns = [
     path('edit_schedule', views.edit_schedule, name='edit_schedule'),
     path('edit_extracurriculars', views.edit_extracurriculars, name='edit_extracurriculars'),
     path('college_search', views.college_search, name='college_search'),
-    path('add_college', views.add_college, name="add_college")
+    path('add_college', views.add_college, name="add_college"),
+    path('application/<int:app_id>/', views.track_application, name='track_application'),
+    path('analyze-essay/', views.analyze_essay, name='analyze_essay'),
 ]
