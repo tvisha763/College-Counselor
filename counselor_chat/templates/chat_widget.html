@@ -89,13 +89,13 @@ document.getElementById('chat-form').addEventListener('submit', async function(e
 
     const data = await response.json();
 
-    appendToChat(message, "user", "");
-    appendToChat(data.reply, "assistant", pageIdentifier);
+    appendToChat(message, "user");
+    appendToChat(data.reply, "assistant");
     document.getElementById('chat-input').value = "";
 });
 
 
-function appendToChat(message, sender, page_id) {
+function appendToChat(message, sender) {
     const chatBox = document.getElementById('chat-box');
     const newMessage = document.createElement('div');
     newMessage.className = sender; 
@@ -106,7 +106,6 @@ function appendToChat(message, sender, page_id) {
     timestamp.innerText = new Date().toLocaleTimeString();
     newMessage.appendChild(messageContent);
     newMessage.appendChild(timestamp);
-    newMessage.pageIdentifier = page_id;
     chatBox.appendChild(newMessage);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
