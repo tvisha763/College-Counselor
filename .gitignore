@@ -37,3 +37,6 @@ coverage.xml
 
 # Migrations should be tracked, so don’t ignore migrations/ unless you're sure
 # But you can ignore auto-created __init__.py in empty migration folders if needed
+
+nginx*
+datadump*
