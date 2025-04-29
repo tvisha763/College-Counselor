@@ -40,3 +40,7 @@ coverage.xml
 
 nginx*
 datadump*
+
+# media lol
+/media/
+/staticfiles/
