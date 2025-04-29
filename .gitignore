@@ -1,0 +1,46 @@
+__pycache__/
+*.py[cod]
+*.so
+
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+*.db
+
+*.bak
+
+.env
+.env.*
+
+# stupid IDEs
+.vscode/
+.idea/
+*.swp
+
+.DS_Store
+Thumbs.db
+
+venv/
+env/
+ENV/
+.venv/
+
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.cache
+
+.pytest_cache/
+
+# Migrations should be tracked, so don’t ignore migrations/ unless you're sure
+# But you can ignore auto-created __init__.py in empty migration folders if needed
+
+nginx*
+datadump*
+
+# media lol
+/media/
+/staticfiles/

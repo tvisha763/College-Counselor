@@ -1,3 +1,2 @@
-channels
-channels-redis
-whitenoise
+openai
+django-environ

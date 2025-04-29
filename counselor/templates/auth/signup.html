@@ -1,18 +1,23 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
+    <title>Sign Up</title>
 </head>
 <body>
-    <form action="{{% url 'signup' %}}" method="POST">
+    <form action="{% url 'counselor:signup' %}" method="POST">
         {% csrf_token %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
         <input type="text" placeholder="First Name" name="fname">
         <input type="text" placeholder="Last Name" name="lname">
         <input type="email" placeholder="Email" name="email">
-        <input type="password" placeholder="Password" name="pword">
-        <input type="password" placeholder="Confirm Password" name="confirmpass">
+        <input type="password" placeholder="Password" name="password">
+        <input type="password" placeholder="Confirm Password" name="confirmPass">
+        <button type = "submit">Submit</button>
     </form>
 </body>
 </html>

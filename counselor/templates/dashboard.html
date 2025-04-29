@@ -1,30 +1,19 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h2>Welcome, {{ user.username }}!</h2>
-
-<h3>Profile</h3>
-{% if profile %}
-<p>GPA: {{ profile.gpa }}</p>
-<p>SAT Score: {{ profile.sat_score }}</p>
-<a href="{% url 'update_profile' %}">Edit</a>
-{% else %}
-<a href="{% url 'update_profile' %}">Add Academic Profile</a>
-{% endif %}
-
-<h3>Extracurriculars</h3>
-<ul>
-    {% for activity in extracurriculars %}
-    <li>{{ activity.name }} - {{ activity.position }}</li>
-    {% endfor %}
-</ul>
-<a href="{% url 'add_extracurricular' %}">Add Extracurricular</a>
-
-<h3>College Applications</h3>
-<ul>
-    {% for app in college_apps %}
-    <li>{{ app.college }} - {{ app.application_status }}</li>
-    {% endfor %}
-</ul>
-
-{% endblock %}
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome To Your AI College Counselor</h1>
+    <a href="{% url 'counselor:edit_profile' %}">Edit Your Profile</a>
+    <a href="{% url 'counselor:edit_schedule' %}">Edit Your Schedule</a>
+    <a href="{% url 'counselor:edit_extracurriculars' %}">Edit Extracurriculars and Awards</a>
+    {% include 'chat_widget.html' %}
+</body>
+</html>
+{% endblock content %}

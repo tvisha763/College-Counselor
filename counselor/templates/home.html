@@ -1,5 +1,7 @@
-{% load static %}
 {% extends 'base.html' %}
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,8 +10,9 @@
     <title>Home</title>
 </head>
 <body>
-    <h1>Welcome to Your AI College Counselor</h1>
-    <a href="#">Sign Up</a>
-    <a href="#">Log In</a>
+    <h1>Welcome To Your AI College Counselor</h1>
+    <a href="{% url 'counselor:login' %}">Log In</a>
+    <a href="{% url 'counselor:signup' %}">Sign Up</a>
 </body>
 </html>
+{% endblock content %}
