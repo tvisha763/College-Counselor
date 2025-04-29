@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.db import models
 from django.forms import CharField
 from django.utils import timezone
 from django.contrib import admin
 from django.conf import settings
 
-# Create your models here.
 class Course(models.Model):
     name = models.CharField(max_length=1000)
     TYPE = [
@@ -15,6 +15,7 @@ class Course(models.Model):
     ]
     type = models.IntegerField(default=9, choices=TYPE, blank=True, null=True)
     organization = models.CharField(max_length=1000, blank=True, null=True)
+
     def __str__(self):
         return '%s - %s' % (self.name, self.type)
 
@@ -205,6 +206,7 @@ class College(models.Model):
     average_gpa = models.FloatField(blank=True, null=True)  
     average_sat = models.IntegerField(blank=True, null=True)  
     average_act = models.IntegerField(blank=True, null=True)  
+
     def __str__(self):
         return (self.name, self.location)
 
@@ -273,6 +275,7 @@ class Scholarship(models.Model):
     college = models.ForeignKey(College, on_delete=models.CASCADE) 
     amount = models.FloatField(blank=True, null=True)  
     deadline = models.DateField()  
+
 
     APP_STATUS = [
         (1, 'In Progress'),

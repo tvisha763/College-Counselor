@@ -15,8 +15,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 
-# Create your views here.
-
+# MAKE SURE TO USE THESE?
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
 
 def home(request):
     return render(request, "home.html")
@@ -483,4 +484,3 @@ def edit_extracurriculars(request):
         'extracurriculars': ec_display,
         'awards': awards,
     })
-
