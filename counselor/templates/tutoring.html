@@ -1,11 +1,21 @@
 {% extends 'base.html' %}
 
 {% block title %}Tutoring{% endblock %}
+
 {% block content %}
-    <form action="{% url 'counselor:tutoring' %}" method="POST">
-        {% csrf_token %}
-        <input type="text" placeholder="Subject" name="subject">
-        <button type="submit">Request Tutor</button>
-    </form>
-    {% include 'chat_widget.html' %}
+<div class="container mt-4" >
+    <div class="mt-5" style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2);margin-bottom: 20px;">
+        <h2 style="color: #f4e4ba;">Request a Tutor</h2>
+        <form action="{% url 'counselor:tutoring' %}" method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject e.g., Biology, Algebra II">
+          </div>
+          <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color:#ffff;">Request Tutor</button>
+        </form>
+      </div>
+  {% include 'chat_widget.html' %}
+
+  
+</div>
 {% endblock %}

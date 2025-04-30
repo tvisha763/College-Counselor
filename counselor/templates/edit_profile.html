@@ -1,73 +1,123 @@
 {% extends 'base.html' %}
 
 {% block title %}Edit Profile{% endblock %}
+
 {% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Form Column -->
+        <div class="col-md-">
+            <div style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2);">
+            <h2 class="mb-4" style=" color: #f4e4ba;">Edit Profile</h2>
+            <form action="{% url 'counselor:edit_profile' %}" method="POST" enctype="multipart/form-data" >
+                {% csrf_token %}
 
-    Edit Profile
-    <form action="{% url 'counselor:edit_profile' %}" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
 
-        {% for message in messages %}
-            {{ message }}
-        {% endfor %}
+                <div class="row mb-3">
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="First Name" name="fname" value="{{ user.fname }}">
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Last Name" name="lname" value="{{ user.lname }}">
+                    </div>
+                </div>
 
-        <input type="text" placeholder="First Name" name="fname" value="{{user.fname}}">
-        <input type="text" placeholder="Last Name" name="lname" value="{{user.lname}}">
-        <input type="email" placeholder="Email" name="email" value="{{user.email}}">
-        <input type="text" placeholder="School" name="school" value="{{ user.school }}">
+                <div class="mb-3">
+                    <input type="email" class="form-control" placeholder="Email" name="email" value="{{ user.email }}">
+                </div>
 
-        <select name="grade">
-            <option value="" {% if user.grade != 9 and user.grade != 10 and user.grade != 11 and user.grade != 12 %}selected{% endif %}>Grade</option>
-            <option value="9" {% if user.grade == 9 %}selected{% endif %}>Freshman</option>
-            <option value="10" {% if user.grade == 10 %}selected{% endif %}>Sophomore</option>
-            <option value="11" {% if user.grade == 11 %}selected{% endif %}>Junior</option>
-            <option value="12" {% if user.grade == 12 %}selected{% endif %}>Senior</option>
-        </select>
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="School" name="school" value="{{ user.school|default_if_none:'' }}">
+                </div>
 
-        <input type="text" placeholder="Location" name="location" value="{{ user.location }}">
+                <div class="row mb-3">
+                    <div class="col">
+                        <select class="form-select" name="grade">
+                            <option value="" {% if user.grade != 9 and user.grade != 10 and user.grade != 11 and user.grade != 12 %}selected{% endif %}>Grade</option>
+                            <option value="9" {% if user.grade == 9 %}selected{% endif %}>Freshman</option>
+                            <option value="10" {% if user.grade == 10 %}selected{% endif %}>Sophomore</option>
+                            <option value="11" {% if user.grade == 11 %}selected{% endif %}>Junior</option>
+                            <option value="12" {% if user.grade == 12 %}selected{% endif %}>Senior</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Location" name="location" value="{{ user.location }}">
+                    </div>
+                </div>
 
-        <select name="citizenship_status">
-            <option value="" {% if user.citizenship_status != 1 and user.citizenship_status != 2 and user.citizenship_status != 3 and user.citizenship_status != 4 %}selected{% endif %}>Citizenship Status</option>
-            <option value="1" {% if user.citizenship_status == 1 %}selected{% endif %}>Citizen</option>
-            <option value="2" {% if user.citizenship_status == 2 %}selected{% endif %}>Permanent Resident</option>
-            <option value="3" {% if user.citizenship_status == 3 %}selected{% endif %}>Visa</option>
-            <option value="4" {% if user.citizenship_status == 4 %}selected{% endif %}>International</option>
-        </select>
+                <div class="row mb-3">
+                    <div class="col">
+                        <select class="form-select" name="citizenship_status">
+                            <option value="" {% if user.citizenship_status != 1 and user.citizenship_status != 2 and user.citizenship_status != 3 and user.citizenship_status != 4 %}selected{% endif %}>Citizenship Status</option>
+                            <option value="1" {% if user.citizenship_status == 1 %}selected{% endif %}>Citizen</option>
+                            <option value="2" {% if user.citizenship_status == 2 %}selected{% endif %}>Permanent Resident</option>
+                            <option value="3" {% if user.citizenship_status == 3 %}selected{% endif %}>Visa</option>
+                            <option value="4" {% if user.citizenship_status == 4 %}selected{% endif %}>International</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" name="first_gen">
+                            <option value="" {% if user.citizenship_status != 1 and user.citizenship_status != 2 %}selected{% endif %}>First Generation Status</option>
+                            <option value="1" {% if user.first_gen == 1 %}selected{% endif %}>Not First Generation</option>
+                            <option value="2" {% if user.first_gen == 2 %}selected{% endif %}>First Generation</option>
+                        </select>
+                    </div>
+                </div>
 
-        <select name="first_gen">
-            <option value="" {% if user.first_gen != 1 and user.first_gen != 2 %}selected{% endif %}>First Generation Status</option>
-            <option value="1" {% if user.first_gen == 1 %}selected{% endif %}>Not First Generation</option>
-            <option value="2" {% if user.first_gen == 2 %}selected{% endif %}>First Generation</option>
-        </select>
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Ethnicity" name="ethnicity" value="{{ user.ethnicity|default_if_none:'' }}">
+                </div>
 
-        {% if user.ethnicity != None %}
-            <input type="text" placeholder="Ethnicity" name="ethnicity" value="{{user.ethnicity}}">
-        {% else %}
-            <input type="text" placeholder="Ethnicity" name="ethnicity">
-        {% endif %}
-        {% if user.gender != None %}
-            <input type="text" placeholder="gender" name="gender" value="{{user.gender}}">
-        {% else %}
-            <input type="text" placeholder="gender" name="gender">
-        {% endif %}
-        {% if user.college_goals != None %}
-            <textarea name="college_goals" placeholder="College Goals">{{user.college_goals}}</textarea>
-        {% else %}
-            <textarea name="college_goals" placeholder="College Goals"></textarea>
-        {% endif %}
-        {% if user.major_goals != None %}
-            <textarea name="major_goals" placeholder="Major Goals">{{user.major_goals}}</textarea>
-        {% else %}
-            <textarea name="major_goals" placeholder="Major Goals"></textarea>
-        {% endif %}
-        <input type="file" name="resume" placeholder="Resume" value="{{user.resume}}">
-        <input type="number" name="class_rank" placeholder="Class Rank" value="{{user.class_rank}}">
-        <input type="number" name="class_size" placeholder="Class Size" value="{{user.class_size}}">
-        <input type="number" name="psat" placeholder="PSAT Score" value="{{user.psat}}">
-        <input type="number" name="sat" placeholder="SAT Score" value="{{user.sat}}">
-        <input type="number" name="act" placeholder="ACT Score" value="{{user.act}}">
-        <button type = "submit">Submit</button>
-    </form>
-    {% include 'chat_widget.html' %}
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Gender" name="gender" value="{{ user.gender|default_if_none:'' }}">
+                </div>
 
+                <div class="mb-3">
+                    <textarea class="form-control" name="college_goals" rows="3" placeholder="College Goals">{{ user.college_goals|default_if_none:'' }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <textarea class="form-control" name="major_goals" rows="3" placeholder="Major Goals">{{ user.major_goals|default_if_none:'' }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Resume</label>
+                    <input type="file" class="form-control" name="resume">
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <input type="number" class="form-control" name="class_rank" placeholder="Class Rank" value="{{ user.class_rank }}">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="class_size" placeholder="Class Size" value="{{ user.class_size }}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <input type="number" class="form-control" name="psat" placeholder="PSAT Score" value="{{ user.psat }}">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="sat" placeholder="SAT Score" value="{{ user.sat }}">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="act" placeholder="ACT Score" value="{{ user.act }}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color:#ffff;">Submit</button>
+            </form>
+            </div>
+        </div>
+
+        <!-- Chat Column -->
+        <div class="col-md-6">
+            {% include 'chat_widget.html' %}
+        </div>
+    </div>
+</div>
 {% endblock %}

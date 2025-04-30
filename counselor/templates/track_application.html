@@ -1,175 +1,103 @@
 {% extends 'base.html' %}
 
 {% block title %}Track Application{% endblock %}
-{% block content %}
-    <style>
-        /* Main Styles */
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        h2, h3 {
-            color: #2c3e50;
-        }
-        
-        form {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 5px;
-        }
-        
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
-        
-        input[type="text"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        textarea {
-            min-height: 100px;
-        }
-        
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        button:hover {
-            background: #2980b9;
-        }
-        
-        hr {
-            margin: 20px 0;
-            border: 0;
-            border-top: 1px solid #eee;
-        }
-        
-        /* Essay Draft Styles */
-        .essay-feedback {
-            min-height: 200px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: white;
-        }
-        
-        /* Highlight Tooltip Styles */
-        .highlight-tooltip {
-            background-color: #FFEB3B;
-            border-bottom: 1px dashed #FF5722;
-            cursor: help;
-            position: relative;
-        }
-        
-        .highlight-tooltip:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            white-space: nowrap;
-            z-index: 100;
-            min-width: 200px;
-            max-width: 400px;
-        }
-        
-        /* Status Colors */
-        .status-complete {
-            color: green;
-        }
-        
-        .status-in-progress {
-            color: orange;
-        }
-    </style>
-    <h2>Tracking Application for {{ application.college }}</h2>
 
-    <form method="POST">
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Tracking Application for {{ application.college }}</h2>
+
+    <form method="POST" class="mb-4 p-4 bg-light rounded border">
         {% csrf_token %}
 
-        <label>Major:</label>
-        <input type="text" name="major" value="{{ application.major }}">
+        <div class="mb-3">
+            <label class="form-label">Major:</label>
+            <input type="text" class="form-control" name="major" value="{{ application.major }}">
+        </div>
 
-        <label>Alt Major:</label>
-        <input type="text" name="alt_major" value="{{ application.alt_major }}">
+        <div class="mb-3">
+            <label class="form-label">Alt Major:</label>
+            <input type="text" class="form-control" name="alt_major" value="{{ application.alt_major }}">
+        </div>
 
-        <label>Application Type:</label>
-        <select name="application_type">
-            {% for val, label in application.TYPE %}
-                <option value="{{ val }}" {% if val == application.application_type %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
+        <div class="mb-3">
+            <label class="form-label">Application Type:</label>
+            <select class="form-select" name="application_type">
+                {% for val, label in application.TYPE %}
+                    <option value="{{ val }}" {% if val == application.application_type %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label>Chance Level:</label>
-        <select name="chance">
-            {% for val, label in application.CHANCE %}
-                <option value="{{ val }}" {% if val == application.chance %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
+        <div class="mb-3">
+            <label class="form-label">Chance Level:</label>
+            <select class="form-select" name="chance">
+                {% for val, label in application.CHANCE %}
+                    <option value="{{ val }}" {% if val == application.chance %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label>Deadline:</label>
-        <input type="date" name="deadline" value="{{ application.deadline|date:'Y-m-d' }}">
+        <div class="mb-3">
+            <label class="form-label">Deadline:</label>
+            <input type="date" class="form-control" name="deadline" value="{{ application.deadline|date:'Y-m-d' }}">
+        </div>
 
-        <label>Location:</label>
-        <select name="location">
-            {% for val, label in application.LOCATION %}
-                <option value="{{ val }}" {% if val == application.location %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
+        <div class="mb-3">
+            <label class="form-label">Location:</label>
+            <select class="form-select" name="location">
+                {% for val, label in application.LOCATION %}
+                    <option value="{{ val }}" {% if val == application.location %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <!-- Status Checkboxes -->
-        <label><input type="checkbox" name="rec_letter_status" value="2" {% if application.rec_letter_status == 2 %}checked{% endif %}> Recommendation Letter Complete</label>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="rec_letter_status" value="2" {% if application.rec_letter_status == 2 %}checked{% endif %}>
+            <label class="form-check-label">Recommendation Letter Complete</label>
+        </div>
 
-        <label><input type="checkbox" name="general_questions_status" value="2" {% if application.general_questions_status == 2 %}checked{% endif %}> General Questions Complete</label>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="general_questions_status" value="2" {% if application.general_questions_status == 2 %}checked{% endif %}>
+            <label class="form-check-label">General Questions Complete</label>
+        </div>
 
-        <label><input type="checkbox" name="grade_report_status" value="2" {% if application.grade_report_status == 2 %}checked{% endif %}> Grade Report Complete</label>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="grade_report_status" value="2" {% if application.grade_report_status == 2 %}checked{% endif %}>
+            <label class="form-check-label">Grade Report Complete</label>
+        </div>
 
-        <label><input type="checkbox" name="SAT_ACT_score_status" value="2" {% if application.SAT_ACT_score_status == 2 %}checked{% endif %}> SAT/ACT Scores Complete</label>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="SAT_ACT_score_status" value="2" {% if application.SAT_ACT_score_status == 2 %}checked{% endif %}>
+            <label class="form-check-label">SAT/ACT Scores Complete</label>
+        </div>
 
-        <label><input type="checkbox" name="scholarship_application_status" value="2" {% if application.scholarship_application_status == 2 %}checked{% endif %}> Scholarship Application Complete</label>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="scholarship_application_status" value="2" {% if application.scholarship_application_status == 2 %}checked{% endif %}>
+            <label class="form-check-label">Scholarship Application Complete</label>
+        </div>
 
-        <label><input type="checkbox" name="FAFSA_application_status" value="2" {% if application.FAFSA_application_status == 2 %}checked{% endif %}> FAFSA Application Complete</label>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="FAFSA_application_status" value="2" {% if application.FAFSA_application_status == 2 %}checked{% endif %}>
+            <label class="form-check-label">FAFSA Application Complete</label>
+        </div>
 
-        <p><strong>Current Status:</strong> 
+        <p class="fw-bold">
+            Current Status: 
             {% if application.application_status == 2 %}
-                <span class="status-complete">Submitted</span>
+                <span class="text-success">Submitted</span>
             {% else %}
-                <span class="status-in-progress">In Progress</span>
+                <span class="text-warning">In Progress</span>
             {% endif %}
         </p>
 
-        <button type="submit">Save Tracking Info</button>
+        <button type="submit" class="btn btn-primary">Save Tracking Info</button>
     </form>
 
     {% if application.application_status != 2 %}
-        <form method="POST" style="margin-top: 20px;">
+        <form method="POST" class="mb-4">
             {% csrf_token %}
             <input type="hidden" name="mark_finished" value="1">
-            <button type="submit">Mark as Finished</button>
+            <button type="submit" class="btn btn-success">Mark as Finished</button>
         </form>
     {% endif %}
 
@@ -177,34 +105,43 @@
 
     <h3>Essay Drafts</h3>
     {% for draft in essay_drafts %}
-        <form method="POST" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
+        <form method="POST" class="mb-4 p-3 border rounded bg-white">
             {% csrf_token %}
             <input type="hidden" name="edit_draft_id" value="{{ draft.id }}">
-            <label>Prompt:</label>
-            <textarea name="prompt" rows="2" cols="100">{{ draft.prompt }}</textarea>
 
-            <label>Draft:</label>
-            <div class="essay-feedback" contenteditable="true" data-draft-id="{{ draft.id }}">{{ draft.draft|safe }}</div>
-            <input type="hidden" name="draft" class="draft-hidden-input">
+            <div class="mb-2">
+                <label class="form-label">Prompt:</label>
+                <textarea class="form-control" name="prompt" rows="2">{{ draft.prompt }}</textarea>
+            </div>
 
-            <button type="submit" name="save_draft_only" value="1">Save Changes</button>
+            <div class="mb-2">
+                <label class="form-label">Draft:</label>
+                <div class="essay-feedback form-control" contenteditable="true" data-draft-id="{{ draft.id }}">{{ draft.draft|safe }}</div>
+                <input type="hidden" name="draft" class="draft-hidden-input">
+            </div>
+
+            <button type="submit" name="save_draft_only" value="1" class="btn btn-secondary">Save Changes</button>
         </form>
     {% endfor %}
 
-    <!-- Add New Draft -->
     <h3>Add New Essay Draft</h3>
-    <form method="POST">
+    <form method="POST" class="p-3 border bg-light rounded">
         {% csrf_token %}
-        <label>Prompt:</label>
-        <textarea name="prompt" rows="2" cols="100"></textarea>
+        <div class="mb-3">
+            <label class="form-label">Prompt:</label>
+            <textarea name="prompt" class="form-control" rows="2"></textarea>
+        </div>
 
-        <label>Draft:</label>
-        <textarea name="draft" rows="6" cols="100"></textarea>
+        <div class="mb-3">
+            <label class="form-label">Draft:</label>
+            <textarea name="draft" class="form-control" rows="6"></textarea>
+        </div>
 
-        <button type="submit" name="save_draft_only" value="1">Add Draft</button>
+        <button type="submit" name="save_draft_only" value="1" class="btn btn-success">Add Draft</button>
     </form>
+</div>
 
-    {% include 'chat_widget.html' %}
+{% include 'chat_widget.html' %}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -1,45 +1,74 @@
 {% extends 'base.html' %}
 
 {% block title %}Edit ECs and Awards{% endblock %}
-{% block content %}
-    <h2>Edit Extracurriculars</h2>
-    {% for EC in extracurriculars %}
-        {{ EC.name }}
-        {{ EC.description }}
-        {{ EC.position }}
-        {{ EC.type }}
-        {{ EC.start_date }}
-        {{ EC.end_date }}
-    {% endfor %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="extracurricular">
-        Name: <input type="text" name="name"><br>
-        Description: <textarea name="description"></textarea><br>
-        Position: <input type="text" name="position"><br>
-        Type: <select name="type">
-            {% for code, label in extracurricular_types %}
-            <option value="{{ code }}">{{ label }}</option>
-            {% endfor %}
-        </select><br>
-        Start Date: <input type="date" name="start_date"><br>
-        End Date: <input type="date" name="end_date"><br>
-        <button type="submit">Add Extracurricular</button>
-    </form>
 
-    <h2>Edit Awards</h2>
-    {% for award in awards %}
-        {{ award.name }}
-        {{ award.description }}
-        {{ award.date_recieved }}
-    {% endfor %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="award">
-        Name: <input type="text" name="award_name"><br>
-        Description: <textarea name="award_description"></textarea><br>
-        Date Received: <input type="date" name="date_received"><br>
-        <button type="submit">Add Award</button>
-    </form>
-{% include 'chat_widget.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- Left Column: ECs and Awards -->
+    <div class="col-md-6">
+      <div style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2);">
+        <h2 style="color: #f4e4ba;">Edit Extracurriculars</h2>
+        {% for EC in extracurriculars %}
+          <div class="mb-3 p-2 border rounded" style="background-color: #f4e4ba; color:#af4d98;">
+            <strong>{{ EC.name }}</strong><br>
+            {{ EC.description }}<br>
+            {{ EC.position }}<br>
+            {{ EC.get_type_display }}<br>
+            {{ EC.start_date }} – {{ EC.end_date }}
+          </div>
+        {% empty %}
+          <p>No extracurriculars added yet.</p>
+        {% endfor %}
+
+        <form method="POST" class="mb-5">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="extracurricular">
+          <div class="mb-2"><input type="text" name="name" class="form-control" placeholder="Name"></div>
+          <div class="mb-2"><textarea name="description" class="form-control" placeholder="Description"></textarea></div>
+          <div class="mb-2"><input type="text" name="position" class="form-control" placeholder="Position"></div>
+          <div class="mb-2">
+            <select name="type" class="form-select">
+              <option disabled selected>Type</option>
+              {% for code, label in extracurricular_types %}
+                <option value="{{ code }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2"><input type="date" name="start_date" class="form-control" placeholder="Start Date"></div>
+          <div class="mb-2"><input type="date" name="end_date" class="form-control" placeholder="End Date"></div>
+          <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color:#ffff;">Add Extracurricular</button>
+        </form>
+      </div>
+
+      <!-- Awards section -->
+      <div style="background-color: #d66ba0; padding: 25px; margin-top: 30px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2);">
+        <h2 style="color: #f4e4ba;">Edit Awards</h2>
+        {% for award in awards %}
+          <div class="mb-3 p-2 border rounded" style="background-color: #f4e4ba; color:#af4d98;">
+            <strong>{{ award.name }}</strong><br>
+            {{ award.description }}<br>
+            {{ award.date_received }}
+          </div>
+        {% empty %}
+          <p>No awards added yet.</p>
+        {% endfor %}
+
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="award">
+          <div class="mb-2"><input type="text" name="award_name" class="form-control" placeholder="Award Name"></div>
+          <div class="mb-2"><textarea name="award_description" class="form-control" placeholder="Description"></textarea></div>
+          <div class="mb-2"><input type="date" name="date_received" class="form-control" placeholder="Date Received"></div>
+          <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color:#ffff;">Add Award</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Chat widget -->
+    <div class="col-md-6">
+      {% include 'chat_widget.html' %}
+    </div>
+  </div>
+</div>
 {% endblock %}
