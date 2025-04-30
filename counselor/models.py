@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.contrib import admin
 from django.conf import settings
 import json
+from django.contrib.auth.models import AbstractUser
 
-# Create your models here.
 class Course(models.Model):
     name = models.CharField(max_length=1000)
     TYPE = [
@@ -132,21 +132,23 @@ class Award(models.Model):
     def __str__(self):
         return self.name
 
-class User(models.Model):
+class User(AbstractUser):
     fname = models.CharField(max_length=1000, blank=True, null=True)
     lname = models.CharField(max_length=1000, blank=True, null=True)
-    email = models.CharField(max_length=1000)
-    password = models.CharField(max_length=1000)
-    salt = models.CharField(max_length=1023, null=True)
-
+    username = None
+    email = models.CharField(max_length=1000, unique=True)
     school = models.CharField(max_length=1000, blank=True, null=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
     GRADE = [
         (9, 'Freshman'),
         (10, 'Sophomore'),
         (11, 'Junior'),
         (12, 'Senior')
     ]
-    grade = models.IntegerField(default=9, choices=GRADE, blank=True, null=True)
+    grade = models.IntegerField(choices=GRADE, default=9)
     location = models.CharField(max_length=1000)
 
     CITIZENSHIP = [
@@ -155,12 +157,12 @@ class User(models.Model):
         (3, 'Visa'),
         (4, 'International')
     ]
-    citizenship_status = models.IntegerField(default = 1, choices=CITIZENSHIP, blank=True, null=True)
+    citizenship_status = models.IntegerField(choices=CITIZENSHIP, default=1)
 
     college_goals = models.TextField(blank=True, null=True)
     major_goals = models.TextField(blank=True, null=True)
 
-    resume = models.FileField(upload_to="resumes", blank=True, null=True)
+    resume = models.FileField(upload_to="resumes/%Y/%m", blank=True, null=True)
 
     class_rank = models.IntegerField(blank=True, null=True)
     class_size = models.IntegerField(blank=True, null=True)
@@ -169,7 +171,7 @@ class User(models.Model):
         (1, 'Not First Gen'),
         (2, 'First Gen')
     ]
-    first_gen = models.IntegerField(default=1, choices=FIRST_GEN, blank=True, null=True)
+    first_gen = models.IntegerField(choices=FIRST_GEN, default=1)
 
     ethnicity = models.CharField(max_length=1000, blank=True, null=True)
     gender = models.CharField(max_length=1000, blank=True, null=True)
@@ -178,18 +180,17 @@ class User(models.Model):
     sat = models.IntegerField(blank=True, null=True)
     act = models.IntegerField(blank=True, null=True)
 
-    freshman_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="fresh_sched")
-    sophomore_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="soph_sched")
-    junior_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="jun_sched")
-    senior_schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, blank=True, null=True, related_name="sen_sched")
-
+    freshman_schedule = models.OneToOneField('Schedule', on_delete=models.CASCADE, blank=True, null=True, related_name="fresh_sched")
+    sophomore_schedule = models.OneToOneField('Schedule', on_delete=models.CASCADE, blank=True, null=True, related_name="soph_sched")
+    junior_schedule = models.OneToOneField('Schedule', on_delete=models.CASCADE, blank=True, null=True, related_name="jun_sched")
+    senior_schedule = models.OneToOneField('Schedule', on_delete=models.CASCADE, blank=True, null=True, related_name="sen_sched")
     
 
-    extracurriculars = models.ManyToManyField(Extracurricular, through='TakenEC', blank=True)
-    awards = models.ManyToManyField(Award, through='WonAward', blank=True)
+    extracurriculars = models.ManyToManyField('Extracurricular', through='TakenEC', blank=True)
+    awards = models.ManyToManyField('Award', through='WonAward', blank=True)
 
     def __str__(self):
-        return self.fname + ' ' + self.lname
+        return f"{self.fname} {self.lname} - {self.get_grade_display()}"
 
 class TakenEC(models.Model):
     extracurricular = models.ForeignKey(Extracurricular, on_delete=models.CASCADE)
