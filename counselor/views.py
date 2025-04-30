@@ -611,6 +611,7 @@ def track_application(request, app_id):
 
 @login_required(login_url='counselor:login')
 def analyze_essay(request):
+    user = request.user
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -623,6 +624,52 @@ def analyze_essay(request):
 
             # OpenAI setup
             client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+            user_data = {
+                'school': user.school,
+                'grade': user.GRADE[user.grade-9][1],
+                'location': user.location,
+                'citizenship' : user.CITIZENSHIP[user.citizenship_status-1][1],
+                'college goals' : user.college_goals,
+                'major goals' : user.major_goals,
+                'class rank' : user.class_rank,
+                'class size' : user.class_size,
+                'first gen status' : user.FIRST_GEN[user.first_gen-1][1],
+                'ethnicity' : user.ethnicity,
+                'gender' : user.gender,
+                'psat' : user.psat,
+                'sat' : user.sat,
+                'act' : user.act
+            }
+
+            ec_str = ""
+            for ec in TakenEC.objects.filter(user=user):
+                data = [
+                    {
+                        'name': ec.extracurricular.name,
+                        'description': ec.extracurricular.description,
+                        'position': ec.extracurricular.position,
+                        'type': ec.extracurricular.get_type_display(),  # convert choice field to readable string
+                        'start_date': ec.extracurricular.start_date.isoformat() if ec.extracurricular.start_date else None,
+                        'end_date': ec.extracurricular.end_date.isoformat() if ec.extracurricular.end_date else None,
+                    }
+                    
+                ]
+
+                ec_str += json.dumps(({'extracurriculars': data})) + " "
+
+            award_str = ""
+            for a in WonAward.objects.filter(user=user):
+                data = [
+                    {
+                        'name': a.award.name,
+                        'description': a.award.description,
+                        'date_received': a.award.date_received.isoformat() if a.award.date_received else None,
+                    }
+                    
+                ]
+
+                award_str += json.dumps(({'extracurriculars': data})) + " "
 
             # Prompt emphasizes using exact substrings from essay
             system_prompt = """
@@ -642,8 +689,9 @@ def analyze_essay(request):
                 - DO NOT paraphrase or invent new text. Only copy directly from the essay.
                 - DO NOT return explanations outside of the JSON array.
                 - Limit each highlighted 'text' to one sentence or phrase (around 5–20 words).
-                - Include no more than 10 suggestions.
-            """
+                - Include no more than 10 suggestions. Fewer than 10 is also fine. 10 is just the upper limit.
+                - Only offer a suggestion if something should be changed
+            """ + "User Profile: " + json.dumps(user_data) + "\n Freshman Schedule: " + json.dumps(get_sched_data(user.freshman_schedule)) + "\n Sophomore Schedule: " + json.dumps(get_sched_data(user.sophomore_schedule)) + "\n Junior Schedule: " + json.dumps(get_sched_data(user.junior_schedule)) + "\n Senior Schedule: " + json.dumps(get_sched_data(user.senior_schedule)) + "\n Extracurriculars: " + ec_str + "\n Awards" + award_str
 
             response = client.chat.completions.create(
                 model="gpt-4",

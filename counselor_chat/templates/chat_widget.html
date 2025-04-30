@@ -1,62 +1,56 @@
-<div id="chat-box">
+<div class="card  shadow-sm mb-3" >
+  <div class="card-header bg-custom " style="background-color: #af4d98; color: #fef8e6;">
+    Counselor Pablo
+  </div>
+  <div class="card-body p-3" id="chat-box" style="background-color: #dccea2; max-height: 400px; overflow-y: auto;">
     <!-- messages will be appended here -->
+  </div>
+  <div class="card-footer" style="background-color: #af4d98;">
+    <form id="chat-form" class="d-flex">
+      {% csrf_token %}
+      <input type="text" id="chat-input" name="message" class="form-control me-2" placeholder="Say something..." required>
+      <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color:#ffff;">Send</button>
+    </form>
+  </div>
 </div>
 
-<form id="chat-form">
-    {% csrf_token %}
-    <input type="text" id="chat-input" name="message" placeholder="Say something..." required>
-    <button type="submit">Send</button>
-</form>
 
 <style>
-    #chat-box {
-        width: 100%;
-        max-width: 10000px;
-        margin: 20px auto;
-        padding: 10px;
-        background-color: #e6ca84;
-        border-radius: 10px;
-        overflow-y: auto;
-        max-height: 400px;
-        scroll-behavior: smooth;
-    }
+  #chat-box .user {
+      background-color: #9DF7E5;
+      color: #000;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 5px 0;
+      max-width: 70%;
+      margin-left: auto;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
 
-    #chat-box .user {
-        background-color: #9DF7E5;
-        color: #000000;
-        text-align: left;
-        border-radius: 10px;
-        padding: 10px;
-        margin: 5px 0;
-        max-width: 35%;
-        margin-left: 60%;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+  #chat-box .assistant {
+      background-color: #D66BA0;
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 5px 0;
+      max-width: 70%;
+      margin-right: auto;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
 
-    #chat-box .assistant {
-        background-color: #D66BA0;
-        color: #ffff;
-        text-align: left;
-        border-radius: 10px;
-        padding: 10px;
-        margin: 5px 0;
-        max-width: 55%;
-        margin-right: 40%;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+  .timestamp {
+      font-size: 0.75em;
+      color: #6c757d;
+      text-align: right;
+      display: block;
+      margin-top: 5px;
+  }
 
-    .timestamp {
-        font-size: 0.8em;
-        color: #888;
-        margin-left: 10px;
-        text-align: right;
-        display: block;
-    }
-
-    #chat-box .user:hover, #chat-box .assistant:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        transition: box-shadow 0.3s ease;
-    }
+  #chat-box .user:hover,
+  #chat-box .assistant:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: box-shadow 0.3s ease;
+  }
 </style>
 
 <!-- Markdown-it for parsing -->
