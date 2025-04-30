@@ -2,24 +2,147 @@
 
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+    
+    <div class="container mt-5">
+        <h1 class="text-center mb-4" style="color: #d66ba0;">Welcome to Your AI College Counselor Dashboard</h1>
+        <!-- Chat Widget Section -->
+        {% include 'chat_widget.html' %}
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6">
+                <!-- College Applications Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header text-white" style="background-color: #af4d98;">
+                        <h4>Your College Applications</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if applications %}
+                            <ul class="list-group list-group-flush">
+                                {% for app in applications %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'counselor:track_application' app.id %}" class="text-dark">
+                                            <strong>{{ app.college }}</strong> — {{ app.get_application_status_display }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No applications added yet. Start by adding your college choices!</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-    <h1>Welcome To Your AI College Counselor</h1>
+                <!-- Profile Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header text-white" style="background-color: #d66ba0;">
+                        <h4>Profile Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Name:</strong> {{ user.fname }} {{ user.lname }}</li>
+                            <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+                            <li class="list-group-item"><strong>Grade:</strong> {{ user.get_grade_display }}</li>
+                            <li class="list-group-item"><strong>School:</strong> {{ user.school }}</li>
+                            <li class="list-group-item"><strong>Location:</strong> {{ user.location }}</li>
+                            <li class="list-group-item"><strong>Citizenship Status:</strong> {{ user.get_citizenship_status_display }}</li>
+                            <li class="list-group-item"><strong>First-Gen:</strong> {{ user.get_first_gen_display }}</li>
+                            <li class="list-group-item"><strong>Ethnicity:</strong> {{ user.ethnicity }}</li>
+                            <li class="list-group-item"><strong>Gender:</strong> {{ user.gender }}</li>
+                            <li class="list-group-item"><strong>College Goals:</strong> {{ user.college_goals }}</li>
+                            <li class="list-group-item"><strong>Major Goals:</strong> {{ user.major_goals }}</li>
+                        </ul>
+                    </div>
+                </div>
 
-    <h2>Your College Applications</h2>
-    {% if applications %}
-        <ul>
-            {% for app in applications %}
-                <li>
-                    <a href="{% url 'counselor:track_application' app.id %}">
-                        {{ app.college }} — {{ app.get_application_status_display }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You haven't added any applications yet.</p>
-    {% endif %}
+                <!-- Test Scores -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header text-white" style="background-color: #af4d98;">
+                        <h4>Test Scores</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>PSAT:</strong> {{ user.psat }}</li>
+                            <li class="list-group-item"><strong>SAT:</strong> {{ user.sat }}</li>
+                            <li class="list-group-item"><strong>ACT:</strong> {{ user.act }}</li>
+                        </ul>
+                    </div>
+                </div>
 
-    {% include 'chat_widget.html' %}
+                <!-- Extracurriculars Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header text-white" style="background-color: #d66ba0;">
+                        <h4>Extracurriculars</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if ecs %}
+                            <ul class="list-group list-group-flush">
+                                {% for ec in ecs %}
+                                    <li class="list-group-item">
+                                        <strong>{{ ec.extracurricular.name }}:</strong> {{ ec.extracurricular.description }} (Position: {{ ec.extracurricular.position }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No extracurriculars added yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Awards Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header text-white" style="background-color: #af4d98;">
+                        <h4>Awards</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if awards %}
+                            <ul class="list-group list-group-flush">
+                                {% for award in awards %}
+                                    <li class="list-group-item">{{ award.award.name }} - {{ award.award.description }} (Received: {{ award.award.date_received }})</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No awards added yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-6">
+                <!-- Academic Schedules -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header text-white" style="background-color: #d66ba0;">
+                        <h4>Academic Schedules</h4>
+                    </div>
+                    <div class="card-body">
+                        {% for year, schedule in academic_years %}
+                            <div class="card mb-3">
+                                <div class="card-header bg-custom" style="background-color: #af4d98;">{{ year }} Schedule</div>
+                                <div class="card-body">
+                                    {% if schedule %}
+                                        <h5 class="card-title">Courses</h5>
+                                        <ul class="list-group list-group-flush">
+                                            {% for course in schedule.course.all %}
+                                                <li class="list-group-item">{{ course.name }} ({{ course.get_type_display }})</li>
+                                            {% endfor %}
+                                        </ul>
+                                        <h5 class="card-title mt-3">GPA</h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">Semester 1 GPA: {{ schedule.sem1_gpa }}</li>
+                                            <li class="list-group-item">Semester 2 GPA: {{ schedule.sem2_gpa }}</li>
+                                        </ul>
+                                    {% else %}
+                                        <p>No schedule available for this year.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+
+    </div>
 
 {% endblock %}

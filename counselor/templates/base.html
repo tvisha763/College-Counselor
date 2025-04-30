@@ -64,32 +64,14 @@
 	    </div>
 	  </nav>
 	</header>
-
-	<main>
-	<div id="block" style="height: 89vh; overflow-y: scroll;" >
-		{% block content %}
-	  	{% endblock %}
-	</div>
-	  
-	</main>
-
-	<!-- <div>
-        <footer class="bg-dark text-white d-flex flex-wrap justify-content-between align-items-center py-3 " style="bottom: 0; width: 100%;">
-            <div class="col-md-4 d-flex align-items-center">
-              <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
-                <svg class="bi" width="30" height="15"><use xlink:href="#bootstrap"/></svg>
-              </a>
-              <span class="text-white">&copy; 2025 Counselor Pablo</span>
-            </div>
-
-            <div class="mx-3">
-              <a href="https://github.com/tvisha763/College-Counselor" class="me-2 text-reset" style="text-decoration: none;">
-                <i class="fa-brands fa-github"></i>
-              </a>
-              <span>Developed By <a href="https://github.com/tvisha763" class="text-decoration-none">@tvisha763</a>, <a href="https://github.com/coolbro4811" class="text-decoration-none">@coolbro4811 </a>, and <a href="https://github.com/August-b2172" class="text-decoration-none">@August-b2172 </a></span>
-            </div>
-        </footer>
-    </div> -->
+	
+	<main class="pt-5 mt-4">
+		<div id="block" style="overflow-y: auto; max-height: calc(100vh - 70px); padding: 20px;">
+		  {% block content %}
+		  {% endblock %}
+		</div>
+	  </main>
+	
 
 	<!-- Jquery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

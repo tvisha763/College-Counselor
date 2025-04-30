@@ -1,29 +1,86 @@
 {% extends 'base.html' %}
 
 {% block title %}College Search{% endblock %}
-{% block content %}
 
-    Suggestions
-    {% for college in colleges %}
-        {{ college.name }}
-        <form action="{% url 'counselor:add_college' %}" method="GET">
-            {% csrf_token %}
-            <input type="hidden" name="college_name" value="{{ college.name }}">
-            <button type="submit">Add College</button>
-        </form>
-    {% endfor %}
-    Search
-    <form action="{% url 'counselor:college_search' %}" method="POST">
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="mb-4" style="color: #d66ba0;">Suggestions</h2>
+
+    <div class="row">
+        {% for college in colleges %}
+        <div class="col-md-6 mb-4">
+            <div class="card" style="background-color: #d66ba0; color:#f4e4ba">
+                <div class="card-body">
+                    <h5 class="card-title">{{ college.name }}</h5>
+                    <p class="card-text">
+                        <strong>Acceptance Rate:</strong> {{ college.acceptance_rate }}%<br>
+                        <strong>Type:</strong> 
+                        {% if college.private == "Yes" %}
+                            Private
+                        {% else %}
+                            Public
+                        {% endif %}<br>
+                        <strong>Out of State Tuition:</strong> ${{ college.outstate }}<br>
+                        <strong>Books Cost:</strong> ${{ college.books_cost }}<br>
+                        <strong>Room and Board:</strong> ${{ college.room_board }}<br>
+                        <strong>Estimated Personal Spending:</strong> ${{ college.personal_spending }}<br>
+                        <strong>Student-to-Faculty Ratio:</strong> {{ college.s_f_ratio }}<br>
+                        <strong>Graduation Rate:</strong> {{ college.grad_rate }}%
+                    </p>
+                    <form action="{% url 'counselor:add_college' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="college_name" value="{{ college.name }}">
+                        <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add College</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="mt-5 mb-3" style="color: #d66ba0;">Search</h2>
+    <form action="{% url 'counselor:college_search' %}" method="POST" class="mb-5">
         {% csrf_token %}
-        <input type="text" name="search">
-        <button type="submit">Search</button>
+        <div class="input-group">
+            <input type="text" class="form-control" name="search" placeholder="Search for a college...">
+            <button type="submit" class="btn btn-outline-info">Search</button>
+        </div>
     </form>
-    {% for result in search_results %}
-        {{ result.name }}
-        <form action="{% url 'counselor:add_college' %}" method="GET">
-            {% csrf_token %}
-            <input type="hidden" name="college_name" value="{{ result.name }}">
-            <button type="submit">Add College</button>
-        </form>
-    {% endfor %}
+
+    {% if search_results %}
+    <h3 class="mb-4">Search Results</h3>
+    <div class="row">
+        {% for result in search_results %}
+        <div class="col-md-6 mb-4">
+            <div class="card" style="background-color: #d66ba0; color:#f4e4ba">
+                <div class="card-body">
+                    <h5 class="card-title">{{ result.name }}</h5>
+                    <p class="card-text">
+                        <strong>Acceptance Rate:</strong> {{ result.acceptance_rate }}%<br>
+                        <strong>Type:</strong> 
+                        {% if result.private == "Yes" %}
+                            Private
+                        {% else %}
+                            Public
+                        {% endif %}<br>
+                        <strong>Out of State Tuition:</strong> ${{ result.outstate }}<br>
+                        <strong>Books Cost:</strong> ${{ result.books_cost }}<br>
+                        <strong>Room and Board:</strong> ${{ result.room_board }}<br>
+                        <strong>Estimated Personal Spending:</strong> ${{ result.personal_spending }}<br>
+                        <strong>Student-to-Faculty Ratio:</strong> {{ result.s_f_ratio }}<br>
+                        <strong>Graduation Rate:</strong> {{ result.grad_rate }}%
+                    </p>
+                    <form action="{% url 'counselor:add_college' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="college_name" value="{{ result.name }}">
+                        <button type="submit" class="btn btn-primary">Add College</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

@@ -1,182 +1,362 @@
 {% extends 'base.html' %}
 
 {% block title %}Edit Schedule{% endblock %}
+
 {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- Form and Schedules Column -->
+    <div class="col-md-6">
+      <div style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2); margin-bottom: 20px;">
+      
+        <!-- Freshman Schedule -->
+        <h4 class="mt-4" style="color: #f4e4ba;">Freshman</h4>
+        <ul class="list-group mb-3">
+            {% for class in freshman_sched %}
+            <li class="list-group-item" style="background-color: #f4e4ba; color: #af4d98; margin-bottom: 20px;">
+                <strong>{{ class.name }}</strong> - {{ class.type }}
+                <div><strong>Grades:</strong> {{ class.sem1_grade }}, {{ class.sem2_grade }}</div>
+                <div>
+                <strong>
+                    {% if class.ap %}
+                    AP Score: {{ class.ap }}
+                    {% elif class.ib %}
+                    IB Score: {{ class.ib }}
+                    {% else %}
+                    No AP/IB Score
+                    {% endif %}
+                </strong>
+                </div>
+                <div><strong>Organization:</strong> {{ class.organization }}</div>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">No classes added yet.</li>
+            {% endfor %}
+        </ul>
 
-    Freshman
-    {% for class in freshman_sched %}
-        {{ class.name }}
-        {{ class.type }}
-        {{ class.sem1_grade }}
-        {{ class.sem2_grade }}
-        {{ class.ap }}
-        {{ class.ib }}
-        {{ class.org }}
-    {% endfor %}
-    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="grade" value="freshman">
-        <input type="text" placeholder="Class Name" name="name">
-        <select name="type">
-            <option value=None>Class Type</option>
-            <option value=1>Regular</option>
-            <option value=2>Honors</option>
-            <option value=3>AP</option>
-            <option value=4>IB</option>
-        </select>
-        <select name="grade_1">
-            <option value=None>Semester 1 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <select name="grade_2">
-            <option value=None>Semester 2 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <input type="number" placeholder="AP Score" name="ap">
-        <input type="number" placeholder="IB Score" name="ib">
-        <input type="text" placeholder="Organization" name="org">
-        <button type="submit">Add Course</button>
-    </form>
+        <!-- Form to add courses -->
+        <form action="{% url 'counselor:edit_schedule' %}" method="POST" class="mb-5">
+            {% csrf_token %}
+            <input type="hidden" name="grade" value="freshman">
+            
+            <div class="row g-2 mb-2">
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Class Name" name="name">
+            </div>
+            <div class="col">
+                <select class="form-select" name="type">
+                <option value=None>Class Type</option>
+                <option value=1>Regular</option>
+                <option value=2>Honors</option>
+                <option value=3>AP</option>
+                <option value=4>IB</option>
+                </select>
+            </div>
+            </div>
 
+            <div class="row g-2 mb-2">
+            <div class="col">
+                <select class="form-select" name="grade_1">
+                <option value=None>Semester 1 Grade</option>
+                {% for g in grade_options %}
+                    <option value="{{ g }}">{{ g }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <select class="form-select" name="grade_2">
+                <option value=None>Semester 2 Grade</option>
+                {% for g in grade_options %}
+                    <option value="{{ g }}">{{ g }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            </div>
 
-    Sophomore
-    {% for class in sophomore_sched %}
-        {{ class.name }}
-        {{ class.type }}
-        {{ class.sem1_grade }}
-        {{ class.sem2_grade }}
-        {{ class.ap }}
-        {{ class.ib }}
-        {{ class.org }}
-    {% endfor %}
-    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="grade" value="sophomore">
-        <input type="text" placeholder="Class Name" name="name">
-        <select name="type">
-            <option value=None>Class Type</option>
-            <option value=1>Regular</option>
-            <option value=2>Honors</option>
-            <option value=3>AP</option>
-            <option value=4>IB</option>
-        </select>
-        <select name="grade_1">
-            <option value=None>Semester 1 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <select name="grade_2">
-            <option value=None>Semester 2 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <input type="number" placeholder="AP Score" name="ap">
-        <input type="number" placeholder="IB Score" name="ib">
-        <input type="text" placeholder="Organization" name="org">
-        <button type="submit">Add Course</button>
-    </form>
+            <div class="row g-2 mb-2">
+            <div class="col">
+                <input type="number" class="form-control" placeholder="AP Score" name="ap">
+            </div>
+            <div class="col">
+                <input type="number" class="form-control" placeholder="IB Score" name="ib">
+            </div>
+            </div>
 
+            <div class="mb-3">
+            <input type="text" class="form-control" placeholder="Organization" name="org">
+            </div>
 
-    Junior
-    {% for class in junior_sched %}
-        {{ class.name }}
-        {{ class.type }}
-        {{ class.sem1_grade }}
-        {{ class.sem2_grade }}
-        {{ class.ap }}
-        {{ class.ib }}
-        {{ class.org }}
-    {% endfor %}
-    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="grade" value="junior">
-        <input type="text" placeholder="Class Name" name="name">
-        <select name="type">
-            <option value=None>Class Type</option>
-            <option value=1>Regular</option>
-            <option value=2>Honors</option>
-            <option value=3>AP</option>
-            <option value=4>IB</option>
-        </select>
-        <select name="grade_1">
-            <option value=None>Semester 1 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <select name="grade_2">
-            <option value=None>Semester 2 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <input type="number" placeholder="AP Score" name="ap">
-        <input type="number" placeholder="IB Score" name="ib">
-        <input type="text" placeholder="Organization" name="org">
-        <button type="submit">Add Course</button>
-    </form>
+            <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add Course</button>
+        </form>
+        </div>
 
 
-    Senior
-    {% for class in senior_sched %}
-        {{ class.name }}
-        {{ class.type }}
-        {{ class.sem1_grade }}
-        {{ class.sem2_grade }}
-        {{ class.ap }}
-        {{ class.ib }}
-        {{ class.org }}
-    {% endfor %}
-    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="grade" value="senior">
-        <input type="text" placeholder="Class Name" name="name">
-        <select name="type">
-            <option value=None>Class Type</option>
-            <option value=1>Regular</option>
-            <option value=2>Honors</option>
-            <option value=3>AP</option>
-            <option value=4>IB</option>
-        </select>
-        <select name="grade_1">
-            <option value=None>Semester 1 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <select name="grade_2">
-            <option value=None>Semester 2 Grade</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="F">F</option>
-        </select>
-        <input type="number" placeholder="AP Score" name="ap">
-        <input type="number" placeholder="IB Score" name="ib">
-        <input type="text" placeholder="Organization" name="org">
-        <button type="submit">Add Course</button>
-    </form>
 
-{% include 'chat_widget.html' %}
+
+        <div style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2); margin-bottom: 20px;">
+      
+            <!-- sophomore Schedule -->
+            <h4 class="mt-4" style="color: #f4e4ba;">Sophomore</h4>
+            <ul class="list-group mb-3">
+                {% for class in sophomore_sched %}
+                <li class="list-group-item" style="background-color: #f4e4ba; color: #af4d98;">
+                    <strong>{{ class.name }}</strong> - {{ class.type }}
+                    <div><strong>Grades:</strong> {{ class.sem1_grade }}, {{ class.sem2_grade }}</div>
+                    <div>
+                    <strong>
+                        {% if class.ap %}
+                        AP Score: {{ class.ap }}
+                        {% elif class.ib %}
+                        IB Score: {{ class.ib }}
+                        {% else %}
+                        No AP/IB Score
+                        {% endif %}
+                    </strong>
+                    </div>
+                    <div><strong>Organization:</strong> {{ class.organization }}</div>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">No classes added yet.</li>
+                {% endfor %}
+            </ul>
+    
+            <!-- Form to add courses -->
+            <form action="{% url 'counselor:edit_schedule' %}" method="POST" class="mb-5">
+                {% csrf_token %}
+                <input type="hidden" name="grade" value="sophomore">
+                
+                <div class="row g-2 mb-2">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Class Name" name="name">
+                </div>
+                <div class="col">
+                    <select class="form-select" name="type">
+                    <option value=None>Class Type</option>
+                    <option value=1>Regular</option>
+                    <option value=2>Honors</option>
+                    <option value=3>AP</option>
+                    <option value=4>IB</option>
+                    </select>
+                </div>
+                </div>
+    
+                <div class="row g-2 mb-2">
+                <div class="col">
+                    <select class="form-select" name="grade_1">
+                    <option value=None>Semester 1 Grade</option>
+                    {% for g in grade_options %}
+                        <option value="{{ g }}">{{ g }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <select class="form-select" name="grade_2">
+                    <option value=None>Semester 2 Grade</option>
+                    {% for g in grade_options %}
+                        <option value="{{ g }}">{{ g }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                </div>
+    
+                <div class="row g-2 mb-2">
+                <div class="col">
+                    <input type="number" class="form-control" placeholder="AP Score" name="ap">
+                </div>
+                <div class="col">
+                    <input type="number" class="form-control" placeholder="IB Score" name="ib">
+                </div>
+                </div>
+    
+                <div class="mb-3">
+                <input type="text" class="form-control" placeholder="Organization" name="org">
+                </div>
+    
+                <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add Course</button>
+            </form>
+            </div>
+
+
+
+
+
+            <div style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2); margin-bottom: 20px;">
+      
+                <!-- junior Schedule -->
+                <h4 class="mt-4" style="color: #f4e4ba;">Junior</h4>
+                <ul class="list-group mb-3">
+                    {% for class in junior_sched %}
+                    <li class="list-group-item" style="background-color: #f4e4ba; color: #af4d98;">
+                        <strong>{{ class.name }}</strong> - {{ class.type }}
+                        <div><strong>Grades:</strong> {{ class.sem1_grade }}, {{ class.sem2_grade }}</div>
+                        <div>
+                        <strong>
+                            {% if class.ap %}
+                            AP Score: {{ class.ap }}
+                            {% elif class.ib %}
+                            IB Score: {{ class.ib }}
+                            {% else %}
+                            No AP/IB Score
+                            {% endif %}
+                        </strong>
+                        </div>
+                        <div><strong>Organization:</strong> {{ class.organization }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">No classes added yet.</li>
+                    {% endfor %}
+                </ul>
+        
+                <!-- Form to add courses -->
+                <form action="{% url 'counselor:edit_schedule' %}" method="POST" class="mb-5">
+                    {% csrf_token %}
+                    <input type="hidden" name="grade" value="junior">
+                    
+                    <div class="row g-2 mb-2">
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Class Name" name="name">
+                    </div>
+                    <div class="col">
+                        <select class="form-select" name="type">
+                        <option value=None>Class Type</option>
+                        <option value=1>Regular</option>
+                        <option value=2>Honors</option>
+                        <option value=3>AP</option>
+                        <option value=4>IB</option>
+                        </select>
+                    </div>
+                    </div>
+        
+                    <div class="row g-2 mb-2">
+                    <div class="col">
+                        <select class="form-select" name="grade_1">
+                        <option value=None>Semester 1 Grade</option>
+                        {% for g in grade_options %}
+                            <option value="{{ g }}">{{ g }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" name="grade_2">
+                        <option value=None>Semester 2 Grade</option>
+                        {% for g in grade_options %}
+                            <option value="{{ g }}">{{ g }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    </div>
+        
+                    <div class="row g-2 mb-2">
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="AP Score" name="ap">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="IB Score" name="ib">
+                    </div>
+                    </div>
+        
+                    <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Organization" name="org">
+                    </div>
+        
+                    <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add Course</button>
+                </form>
+                </div>
+
+
+
+
+
+
+
+                <div style="background-color: #d66ba0; padding: 25px; border-radius: 5px; box-shadow:3px 3px 4px rgba(0,0,0,0.2);margin-bottom: 20px;">
+      
+                    <!-- Senior Schedule -->
+                    <h4 class="mt-4" style="color: #f4e4ba;">Senior</h4>
+                    <ul class="list-group mb-3">
+                        {% for class in senior_sched %}
+                        <li class="list-group-item" style="background-color: #f4e4ba; color: #af4d98;">
+                            <strong>{{ class.name }}</strong> - {{ class.type }}
+                            <div><strong>Grades:</strong> {{ class.sem1_grade }}, {{ class.sem2_grade }}</div>
+                            <div>
+                            <strong>
+                                {% if class.ap %}
+                                AP Score: {{ class.ap }}
+                                {% elif class.ib %}
+                                IB Score: {{ class.ib }}
+                                {% else %}
+                                No AP/IB Score
+                                {% endif %}
+                            </strong>
+                            </div>
+                            <div><strong>Organization:</strong> {{ class.organization }}</div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No classes added yet.</li>
+                        {% endfor %}
+                    </ul>
+            
+                    <!-- Form to add courses -->
+                    <form action="{% url 'counselor:edit_schedule' %}" method="POST" class="mb-5">
+                        {% csrf_token %}
+                        <input type="hidden" name="grade" value="senior">
+                        
+                        <div class="row g-2 mb-2">
+                        <div class="col">
+                            <input type="text" class="form-control" placeholder="Class Name" name="name">
+                        </div>
+                        <div class="col">
+                            <select class="form-select" name="type">
+                            <option value=None>Class Type</option>
+                            <option value=1>Regular</option>
+                            <option value=2>Honors</option>
+                            <option value=3>AP</option>
+                            <option value=4>IB</option>
+                            </select>
+                        </div>
+                        </div>
+            
+                        <div class="row g-2 mb-2">
+                        <div class="col">
+                            <select class="form-select" name="grade_1">
+                            <option value=None>Semester 1 Grade</option>
+                            {% for g in grade_options %}
+                                <option value="{{ g }}">{{ g }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" name="grade_2">
+                            <option value=None>Semester 2 Grade</option>
+                            {% for g in grade_options %}
+                                <option value="{{ g }}">{{ g }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        </div>
+            
+                        <div class="row g-2 mb-2">
+                        <div class="col">
+                            <input type="number" class="form-control" placeholder="AP Score" name="ap">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="form-control" placeholder="IB Score" name="ib">
+                        </div>
+                        </div>
+            
+                        <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Organization" name="org">
+                        </div>
+            
+                        <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add Course</button>
+                    </form>
+                    </div>
+    </div>
+
+    <!-- Chat Widget Column -->
+    <div class="col-md-6">
+      {% include 'chat_widget.html' %}
+    </div>
+  </div>
+</div>
 {% endblock %}
