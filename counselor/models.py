@@ -140,7 +140,7 @@ class User(AbstractUser):
     school = models.CharField(max_length=1000, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
 
     GRADE = [
         (9, 'Freshman'),
