@@ -25,7 +25,6 @@ from django.utils.dateparse import parse_date
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth import logout as django_logout
 
-# MAKE SURE TO USE THESE?
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 
