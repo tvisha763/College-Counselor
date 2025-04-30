@@ -23,6 +23,7 @@ import ast
 from rapidfuzz import process, fuzz
 from django.utils.dateparse import parse_date
 from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import logout as django_logout
 
 # MAKE SURE TO USE THESE?
 from django.contrib.auth.decorators import login_required
@@ -121,8 +122,8 @@ def login(request):
 
 def logout(request):
     if request.user.is_authenticated:
-        logout(request)
-    return redirect('counseler:home')
+        django_logout(request)
+    return redirect('counselor:home')
 
 
 
@@ -131,7 +132,7 @@ def home(request):
 
 @login_required(login_url='counselor:login')
 def dashboard(request):
-    user = User.objects.get(email=request.session["email"])
+    user = request.user 
     applications = CollegeApplication.objects.filter(user=user)
 
     return render(request, "dashboard.html", {
