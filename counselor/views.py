@@ -138,13 +138,11 @@ def dashboard(request):
     return render(request, "dashboard.html", {
         "applications": applications
     })
-    
-def edit_profile(request):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
 
+@login_required(login_url='counselor:login')
+def edit_profile(request):
     try:
-        user = User.objects.get(email=request.session["email"])
+        user = request.user
     except User.DoesNotExist:
         messages.error(request, "User not found.")
         return redirect('counselor:login')
@@ -293,11 +291,9 @@ def clean_name(name):
     return ' '.join([word for word in name.split() if word not in common_words])
 
 @csrf_exempt
+@login_required(login_url='counselor:login')
 def college_search(request):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
-    
-    user = User.objects.get(email=request.session["email"])
+    user = request.user 
 
     file_path = os.path.join(settings.BASE_DIR, 'counselor', 'static', 'College.csv')
     college_dataset = pd.read_csv(file_path, usecols=["Name", "Private","Apps","Accept","Enroll","F.Undergrad","P.Undergrad","Outstate","Room.Board","Books","Personal","S.F.Ratio","Grad.Rate"])
@@ -606,9 +602,8 @@ def analyze_essay(request):
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 
+@login_required(login_url='counselor:login')
 def tutoring(request):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
     if request.method == "POST":
         subject = request.POST.get("subject")
     return render(request, 'tutoring.html')
