@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Young+Serif&display=swap');
+
+body {
+  padding-top: 3rem;
+  background-color: #f4e4ba;
+}
+
+.navbar {
+    background-color: #d66ba0;
+}
+
+.navbar-brand {
+    color: #f4e4ba;
+}
+
+.navbar-toggler {
+    color: #af4d98;
+}
+
+.navbar-toggler-icon {
+    color: #f4e4ba;
+}
+
+.collapse{
+    color: #f4e4ba;
+}

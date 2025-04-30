@@ -1,19 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Welcome To Your AI College Counselor</h1>
+{% extends 'base.html' %}
 
-    <a href="{% url 'counselor:edit_profile' %}">Edit Your Profile</a><br>
-    <a href="{% url 'counselor:edit_schedule' %}">Edit Your Schedule</a><br>
-    <a href="{% url 'counselor:edit_extracurriculars' %}">Edit Extracurriculars and Awards</a><br>
-    <a href="{% url 'counselor:tutoring' %}">Tutoring</a><br>
-    <a href="{% url 'counselor:college_search' %}">College Search</a><br>
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+    <h1>Welcome To Your AI College Counselor</h1>
 
     <h2>Your College Applications</h2>
     {% if applications %}
@@ -32,5 +22,4 @@
 
     {% include 'chat_widget.html' %}
 
-</body>
-</html>
+{% endblock %}

@@ -1,12 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Your Profile</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+
     Edit Profile
     <form action="{% url 'counselor:edit_profile' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
@@ -72,7 +68,6 @@
         <input type="number" name="act" placeholder="ACT Score" value="{{user.act}}">
         <button type = "submit">Submit</button>
     </form>
-    <script type="text/javascript" src="{% static 'scripts/script.js' %}"></script>
-{% include 'chat_widget.html' %}
-</body>
-</html>
+    {% include 'chat_widget.html' %}
+
+{% endblock %}

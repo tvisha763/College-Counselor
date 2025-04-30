@@ -1,11 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit ECs and Awards</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Edit ECs and Awards{% endblock %}
+{% block content %}
     <h2>Edit Extracurriculars</h2>
     {% for EC in extracurriculars %}
         {{ EC.name }}
@@ -46,5 +42,4 @@
         <button type="submit">Add Award</button>
     </form>
 {% include 'chat_widget.html' %}
-</body>
-</html>
+{% endblock %}

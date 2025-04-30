@@ -1,12 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Schedule</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Edit Schedule{% endblock %}
+{% block content %}
+
     Freshman
     {% for class in freshman_sched %}
         {{ class.name }}
@@ -183,5 +179,4 @@
     </form>
 
 {% include 'chat_widget.html' %}
-</body>
-</html>
+{% endblock %}

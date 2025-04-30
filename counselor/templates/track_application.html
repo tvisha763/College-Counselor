@@ -1,12 +1,7 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Application</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% extends 'base.html' %}
+
+{% block title %}Track Application{% endblock %}
+{% block content %}
     <style>
         /* Main Styles */
         body {
@@ -111,8 +106,6 @@
             color: orange;
         }
     </style>
-</head>
-<body>
     <h2>Tracking Application for {{ application.college }}</h2>
 
     <form method="POST">
@@ -465,5 +458,4 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         </style>
-</body>
-</html>
+{% endblock %}
