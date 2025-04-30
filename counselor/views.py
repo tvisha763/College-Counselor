@@ -129,10 +129,8 @@ def logout(request):
 def home(request):
         return render(request, 'home.html')
 
+@login_required(login_url='counselor:login')
 def dashboard(request):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
-
     user = User.objects.get(email=request.session["email"])
     applications = CollegeApplication.objects.filter(user=user)
 

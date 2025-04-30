@@ -136,7 +136,7 @@ class User(AbstractUser):
     fname = models.CharField(max_length=1000, blank=True, null=True)
     lname = models.CharField(max_length=1000, blank=True, null=True)
     username = None
-    email = models.CharField(max_length=1000, unique=True)
+    email = models.EmailField(max_length=1000, unique=True)
     school = models.CharField(max_length=1000, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
