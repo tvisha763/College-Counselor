@@ -604,6 +604,8 @@ def analyze_essay(request):
 
 @login_required(login_url='counselor:login')
 def tutoring(request):
-    if request.method == "POST":
-        subject = request.POST.get("subject")
-    return render(request, 'tutoring.html')
+    subject = request.POST.get("subject", "")
+    return render(request, 'tutoring.html', {
+        'page_identifier': '_tutoring',
+        'subject': subject
+    })

@@ -59,54 +59,94 @@
     }
 </style>
 
+<!-- Markdown-it for parsing -->
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<!-- DOMPurify for sanitizing the generated HTML -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+
 <script>
-
 let isCoolDown = false;
-let chatDelay = 1500;
+const chatDelay = 1500;
 
-document.getElementById('chat-form').addEventListener('submit', async function(e) {
+const tutoringSubject = "{{ subject|default:'' }}";
+
+document.addEventListener('DOMContentLoaded', () => {
+  const pageIdentifier = "{{ page_identifier }}";
+
+  const md = markdownit({ html: false, linkify: true, typographer: true });
+
+  loadChatHistory(pageIdentifier);
+
+  document.getElementById('chat-form').addEventListener('submit', async e => {
     e.preventDefault();
+    if (isCoolDown) return alert('Please wait a few seconds before sending another message.');
 
-    if (isCoolDown) {
-      alert('Please wait a few seconds before sending another message.');
-      return;
-    }
+    const inputEl = document.getElementById('chat-input');
+    const message = inputEl.value.trim();
+    if (!message) return;
+
     isCoolDown = true;
     setTimeout(() => { isCoolDown = false; }, chatDelay);
 
-    let message = document.getElementById('chat-input').value;
-    let pageIdentifier = "{{ page_identifier }}";
-    console.log(pageIdentifier);
+    appendToChat(message, 'user');
 
-    const response = await fetch("{% url 'counselor_chat:chat' %}", {
+    const aiResp = await fetch("{% url 'counselor_chat:chat' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `message=${encodeURIComponent(message)}&page_identifier=${encodeURIComponent(pageIdentifier)}&subject=${encodeURIComponent(tutoringSubject)}`
+    });
+    const { reply } = await aiResp.json();
+
+    appendToChat(reply, 'assistant');
+
+    inputEl.value = '';
+  });
+
+  function appendToChat(text, sender) {
+    const chatBox = document.getElementById('chat-box');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = sender;
+
+    let rawHtml = md.render(text);
+    let safeHtml = DOMPurify.sanitize(rawHtml);
+
+    msgDiv.innerHTML = `
+      <span class="message">${safeHtml}</span>
+      <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+    `;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  async function loadChatHistory(pageIdentifier) {
+    const url = "{% url 'counselor_chat:get_chat_history' %}"
+      + `?page_identifier=${encodeURIComponent(pageIdentifier)}`;
+    try {
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) throw new Error('Network error');
+      const { messages } = await res.json();
+      messages.forEach(m => appendToChat(m.message, m.role));
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    }
+  }
+
+  async function saveChatMessage(message, role, pageIdentifier) {
+    try {
+      await fetch("{% url 'counselor_chat:save_chat_message' %}", {
         method: 'POST',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/x-www-form-urlencoded'
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
         },
-        body: `message=${encodeURIComponent(message)}&page_identifier=${encodeURIComponent(pageIdentifier)}`
-    });
-
-    const data = await response.json();
-
-    appendToChat(message, "user");
-    appendToChat(data.reply, "assistant");
-    document.getElementById('chat-input').value = "";
+        body: JSON.stringify({ message, role, page_identifier: pageIdentifier })
+      });
+    } catch (err) {
+      console.error("Error saving message:", err);
+    }
+  }
 });
-
-
-function appendToChat(message, sender) {
-    const chatBox = document.getElementById('chat-box');
-    const newMessage = document.createElement('div');
-    newMessage.className = sender; 
-    const messageContent = document.createElement('span');
-    messageContent.innerText = message;
-    const timestamp = document.createElement('span');
-    timestamp.className = 'timestamp';
-    timestamp.innerText = new Date().toLocaleTimeString();
-    newMessage.appendChild(messageContent);
-    newMessage.appendChild(timestamp);
-    chatBox.appendChild(newMessage);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
 </script>
