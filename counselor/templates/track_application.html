@@ -250,9 +250,6 @@
                 try {
                     console.log('Starting analysis...');
         
-                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-                    if (!csrfToken) throw new Error('CSRF token not found');
-        
                     const startTime = Date.now();
                     const response = await fetch("{% url 'counselor:analyze_essay' %}", {
                         method: "POST",

@@ -32,7 +32,10 @@ SECRET_KEY = 'django-insecure-gg(8_8@%d@&1ep_c1%5*eau8!@zeh8#6ry^*x5xl_m@6qj!6k^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1'
+]
 
 
 # Application definition
@@ -153,3 +156,17 @@ SESSION_COOKIE_AGE = 259200
 CSRF_COOKIE_SECURE = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_HTTPONLY = True 
+
+AUTH_USER_MODEL = 'counselor.User'
+
+# session settings
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_AGE = 259200
+CSRF_COOKIE_SECURE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True 
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000',
+]
