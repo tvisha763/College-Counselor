@@ -124,11 +124,9 @@ def logout(request):
 def home(request):
         return render(request, 'home.html')
 
+@login_required(login_url='counselor:login')
 def dashboard(request):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
-    else:
-        return render(request, "dashboard.html")
+    return render(request, "dashboard.html")
     
 def edit_profile(request):
     if not request.session.get('logged_in'):
