@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = YOUR_KEY_HERE
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
