@@ -49,3 +49,5 @@ def chat_view(request):
         return JsonResponse({"reply": ai_reply})
 
     return JsonResponse({"error": "Invalid method"}, status=400)
+
+

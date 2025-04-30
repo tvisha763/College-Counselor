@@ -772,15 +772,25 @@ def analyze_essay(request):
             # OpenAI setup
             client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
+            # Prompt emphasizes using exact substrings from essay
             system_prompt = """
-            You are an expert college admissions counselor.
-            Highlight important parts of the student's college essay and give suggestions for improvement.
-            Return ONLY a valid JSON array like this:
-            [
-              {"text": "important phrase", "suggestion": "reason or suggestion"},
-              ...
-            ]
-            Do NOT include any explanation outside the JSON.
+                You are an expert college admissions counselor.
+
+                You will be given a student's college essay. Your task is to extract exact sentences or phrases directly from the essay that are either:
+                - Strong or meaningful and worth keeping, or
+                - In need of improvement with specific, constructive suggestions.
+
+                You MUST return a JSON array of objects in the format:
+                [
+                {"text": "<exact text from the essay>", "suggestion": "<specific suggestion or reasoning>"},
+                ...
+                ]
+
+                Rules:
+                - DO NOT paraphrase or invent new text. Only copy directly from the essay.
+                - DO NOT return explanations outside of the JSON array.
+                - Limit each highlighted 'text' to one sentence or phrase (around 5–20 words).
+                - Include no more than 10 suggestions.
             """
 
             response = client.chat.completions.create(
@@ -814,3 +824,11 @@ def analyze_essay(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+
+def tutoring(request):
+    if not request.session.get('logged_in'):
+        return redirect('counselor:login')
+    if request.method == "POST":
+        subject = request.POST.get("subject")
+    return render(request, 'tutoring.html')

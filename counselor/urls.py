@@ -14,4 +14,5 @@ urlpatterns = [
     path('add_college', views.add_college, name="add_college"),
     path('application/<int:app_id>/', views.track_application, name='track_application'),
     path('analyze-essay/', views.analyze_essay, name='analyze_essay'),
+    path('tutoring', views.tutoring, name='tutoring'),
 ]

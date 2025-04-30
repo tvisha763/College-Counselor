@@ -214,154 +214,155 @@
     {% include 'chat_widget.html' %}
 
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            // Debugging initialization
-            console.log('Document loaded, initializing essay analysis...');
-            
-            // Get CSRF token - works with Django's default templates
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                             document.querySelector('meta[name="csrf-token"]')?.content;
-            
-            if (!csrftoken) {
-                console.error('CSRF token not found! Check your template tags.');
-                return;
-            } else {
-                console.log('CSRF token found:', csrftoken.slice(0, 10) + '...');
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing essay analyzer...');
         
-            // Main analysis function
-            async function analyzeEssayContent(element) {
-                console.log('Starting analysis...');
-                
-                const originalContent = element.innerHTML;
-                const textContent = element.innerText.trim();
-                
-                if (textContent.length < 10) {
-                    console.log('Text too short for analysis');
+            const originalContents = new Map();
+        
+            document.querySelectorAll('.essay-feedback').forEach(essayDiv => {
+                originalContents.set(essayDiv, essayDiv.innerHTML);
+        
+                const button = document.createElement('button');
+                button.textContent = 'Analyze Essay';
+                button.className = 'analyze-btn';
+                button.style.cssText = `
+                    display: block;
+                    margin-top: 10px;
+                    padding: 8px 15px;
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                `;
+                essayDiv.parentNode.insertBefore(button, essayDiv.nextSibling);
+        
+                button.addEventListener('click', async function(event) {
+                    event.preventDefault(); // ✅ Prevent page reload
+                    await analyzeAndRenderEssay(essayDiv);
+                });
+            });
+        
+            async function analyzeAndRenderEssay(essayDiv) {
+                const originalContent = originalContents.get(essayDiv);
+                const text = essayDiv.innerText.trim();
+        
+                if (text.length < 10) {
+                    showError('Please enter at least 10 characters');
                     return;
                 }
-                
-                // Show loading state
-                element.innerHTML = originalContent + 
-                    '<div style="color:#999; padding:5px;">Analyzing essay... (this may take 10-20 seconds)</div>';
-                
+        
+                essayDiv.innerHTML = '<div class="loading-message">Analyzing your essay... <div class="spinner"></div></div>';
+        
                 try {
-                    console.log('Sending request with text:', textContent.slice(0, 50) + '...');
-                    
-                    const startTime = performance.now();
+                    console.log('Starting analysis...');
+        
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                    if (!csrfToken) throw new Error('CSRF token not found');
+        
+                    const startTime = Date.now();
                     const response = await fetch("{% url 'counselor:analyze_essay' %}", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
-                            "X-CSRFToken": "{{ csrf_token }}",
-                            "X-Requested-With": "XMLHttpRequest"
+                            "X-CSRFToken": "{{ csrf_token }}"
                         },
-                        body: JSON.stringify({ 
-                            text: textContent,
-                            application_id: element.closest('form')?.querySelector('[name="edit_draft_id"]')?.value
-                        })
+                        body: JSON.stringify({ text: text })
                     });
-                    
+                    console.log(`Request completed in ${Date.now() - startTime}ms`);
+        
                     if (!response.ok) {
-                        const errorData = await response.json().catch(() => null);
-                        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`);
+                        const errorText = await response.text();
+                        console.error('Server error:', response.status, errorText);
+                        throw new Error(`Server error: ${response.status}`);
                     }
-                    
-                    const data = await response.json();
-                    const duration = ((performance.now() - startTime)/1000).toFixed(2);
-                    console.log(`Analysis completed in ${duration}s`, data);
-                    
-                    if (!data.highlights || data.highlights.length === 0) {
-                        element.innerHTML = originalContent;
-                        console.log('No highlights returned from analysis');
-                        return;
+        
+                    const result = await response.json();
+                    console.log('Analysis results:', result);
+        
+                    if (!result.highlights || !Array.isArray(result.highlights)) {
+                        throw new Error('Invalid response format');
                     }
-                    
-                    // Process highlights while preserving HTML structure
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = originalContent;
-                    
-                    // Case-insensitive highlight without breaking HTML
-                    data.highlights.forEach(item => {
-                        const regex = new RegExp(escapeRegExp(item.text), 'gi');
-                        highlightTextNodes(tempDiv, regex, item.suggestion);
-                    });
-                    
-                    element.innerHTML = tempDiv.innerHTML;
-                    initTooltips();
-                    
+        
+                    renderAnalyzedContent(essayDiv, originalContent, result.highlights);
+        
                 } catch (error) {
                     console.error('Analysis failed:', error);
-                    element.innerHTML = originalContent;
-                    
-                    // Show error to user
-                    const errorDiv = document.createElement('div');
-                    errorDiv.style.color = 'red';
-                    errorDiv.style.padding = '5px';
-                    errorDiv.textContent = 'Analysis failed. Please try again.';
-                    element.parentNode.insertBefore(errorDiv, element.nextSibling);
-                    
-                    setTimeout(() => errorDiv.remove(), 5000);
+                    essayDiv.innerHTML = originalContent;
+                    showError(getUserErrorMessage(error));
                 }
             }
         
-            // Helper function to highlight text nodes
+            function renderAnalyzedContent(container, originalContent, highlights) {
+                const newContent = document.createElement('div');
+                newContent.innerHTML = originalContent;
+        
+                highlights.forEach(item => {
+                    if (!item.text) return;
+                    try {
+                        const regex = new RegExp(escapeRegExp(item.text), 'gi');
+                        highlightTextNodes(newContent, regex, item.suggestion);
+                    } catch (e) {
+                        console.warn('Failed to highlight:', item.text, e);
+                    }
+                });
+        
+                container.innerHTML = newContent.innerHTML;
+                initTooltips(container);
+            }
+        
             function highlightTextNodes(element, regex, suggestion) {
                 const treeWalker = document.createTreeWalker(
-                    element, 
-                    NodeFilter.SHOW_TEXT, 
-                    { acceptNode: node => 
-                        node.nodeValue.trim().length > 0 ? 
-                        NodeFilter.FILTER_ACCEPT : 
-                        NodeFilter.FILTER_REJECT 
-                    }
+                    element,
+                    NodeFilter.SHOW_TEXT,
+                    { acceptNode: node => node.nodeValue.trim().length > 0 }
                 );
-                
-                const textNodes = [];
-                while(treeWalker.nextNode()) textNodes.push(treeWalker.currentNode);
-                
-                textNodes.forEach(textNode => {
-                    const newHtml = textNode.nodeValue.replace(
+        
+                const nodes = [];
+                while (treeWalker.nextNode()) nodes.push(treeWalker.currentNode);
+        
+                nodes.forEach(node => {
+                    const newHtml = node.nodeValue.replace(
                         regex,
-                        match => `<span class="highlight-tooltip" title="${escapeHtml(suggestion)}">${match}</span>`
+                        `<span class="highlight-visible" data-tooltip="${escapeHtml(suggestion || '')}">$&</span>`
                     );
-                    
-                    if (newHtml !== textNode.nodeValue) {
+        
+                    if (newHtml !== node.nodeValue) {
                         const wrapper = document.createElement('span');
                         wrapper.innerHTML = newHtml;
-                        textNode.parentNode.replaceChild(wrapper, textNode);
+                        node.parentNode.replaceChild(wrapper, node);
                     }
                 });
             }
         
-            // Initialize tooltip hover effects
-            function initTooltips() {
-                document.querySelectorAll('.highlight-tooltip').forEach(tooltip => {
-                    tooltip.addEventListener('mouseenter', showTooltip);
-                    tooltip.addEventListener('mouseleave', hideTooltip);
+            function initTooltips(container) {
+                container.querySelectorAll('.highlight-visible').forEach(hl => {
+                    hl.addEventListener('mouseenter', showTooltip);
+                    hl.addEventListener('mouseleave', hideTooltip);
                 });
             }
         
-            function showTooltip(event) {
+            function showTooltip(e) {
                 const tooltip = document.createElement('div');
-                tooltip.className = 'active-tooltip';
-                tooltip.textContent = this.title;
-                
-                // Position tooltip above the highlight
+                tooltip.className = 'essay-tooltip';
+                tooltip.textContent = this.dataset.tooltip;
+        
                 const rect = this.getBoundingClientRect();
-                tooltip.style.position = 'fixed';
                 tooltip.style.left = `${rect.left + window.scrollX}px`;
                 tooltip.style.top = `${rect.top + window.scrollY - 5}px`;
                 tooltip.style.transform = 'translateY(-100%)';
-                
+        
                 document.body.appendChild(tooltip);
+                this._tooltip = tooltip;
             }
         
             function hideTooltip() {
-                document.querySelectorAll('.active-tooltip').forEach(t => t.remove());
+                if (this._tooltip) {
+                    this._tooltip.remove();
+                    delete this._tooltip;
+                }
             }
         
-            // Utility functions
             function escapeRegExp(string) {
                 return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             }
@@ -375,62 +376,93 @@
                     .replace(/'/g, "&#039;");
             }
         
-            // Set up event listeners
-            document.querySelectorAll('.essay-feedback').forEach(div => {
-                // Blur event for automatic analysis
-                div.addEventListener('blur', function() {
-                    if (!this.dataset.noAutoAnalyze) {
-                        analyzeEssayContent(this);
-                    }
-                });
-                
-                // Manual analysis button (fallback)
-                const analyzeBtn = document.createElement('button');
-                analyzeBtn.className = 'analyze-btn';
-                analyzeBtn.textContent = 'Analyze Essay';
-                analyzeBtn.style.marginTop = '10px';
-                analyzeBtn.onclick = () => analyzeEssayContent(div);
-                
-                div.insertAdjacentElement('afterend', analyzeBtn);
-            });
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                document.body.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 5000);
+            }
         
-            console.log('Essay analysis initialized successfully');
+            function getUserErrorMessage(error) {
+                if (error.message.includes('CSRF')) return 'Session expired. Please refresh.';
+                if (error.message.includes('status 500')) return 'Server error. Try again later.';
+                if (error.message.includes('status 404')) return 'Service unavailable.';
+                return error.message || 'Analysis failed. Please try again.';
+            }
         });
+        document.querySelectorAll('form').forEach(form => {
+            const draftDiv = form.querySelector('.essay-feedback');
+            const hiddenInput = form.querySelector('.draft-hidden-input');
+
+            if (draftDiv && hiddenInput) {
+                form.addEventListener('submit', () => {
+                    hiddenInput.value = draftDiv.innerHTML.trim();
+                });
+            }
+        });
+
         </script>
         
+        
         <style>
-        .highlight-tooltip {
-            background-color: #FFF9C4;
-            border-bottom: 2px dotted #FFA000;
-            position: relative;
+        /* GUARANTEED VISIBLE STYLES */
+        .highlight-visible {
+            background-color: #ff0 !important;
+            border-bottom: 2px solid #f90 !important;
+            padding: 0 2px !important;
+            border-radius: 3px !important;
             cursor: help;
         }
         
-        .active-tooltip {
+        /* LOADING STATE */
+        .loading-message {
+            color: #666;
+            font-style: italic;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* TOOLTIPS */
+        .essay-tooltip {
+            position: absolute;
             background: #333;
             color: white;
             padding: 8px 12px;
             border-radius: 4px;
             font-size: 14px;
-            max-width: 300px;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 300px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             pointer-events: none;
         }
         
-        .analyze-btn {
-            background: #4CAF50;
+        /* ERROR MESSAGE */
+        .error-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #f44336;
             color: white;
-            border: none;
-            padding: 8px 15px;
+            padding: 12px 20px;
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        
-        .analyze-btn:hover {
-            background: #388E3C;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         </style>
 </body>
