@@ -28,7 +28,7 @@ def chat_view(request):
         history = [{"role": h.role, "content": h.message} for h in past_messages]
 
         chat_service = ChatService(system_prompt, history)
-        ai_reply = chat_service.chat(user_input)
+        ai_reply = chat_service.chat(user_input, user=user_instance)
 
         ChatHistory.objects.create(
             user=user_instance,
