@@ -36,13 +36,15 @@ def chat_view(request):
         user=user_instance,
         page_identifier=page_identifier,
         role='user',
-        message=user_input
+        message=user_input,
+        timestamp=now()
     )
     ChatHistory.objects.create(
         user=user_instance,
         page_identifier=page_identifier,
         role='assistant',
-        message=ai_reply
+        message=ai_reply,
+        timestamp=now()
     )
 
     store_in_session(request, page_identifier, 'user', user_input)
@@ -66,7 +68,7 @@ def get_chat_history(request):
         {
             "role": entry.role,
             "message": entry.message,
-            "timestamp": entry.timestamp.isoformat()
+            "timestamp": entry.timestamp.strftime("%Y-%m-%d at %H:%M:%S")
         }
         for entry in chat_entries
     ]

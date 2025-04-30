@@ -290,7 +290,6 @@ common_words = ['University', 'College', 'Of', 'At', 'The', 'Institute', 'School
 def clean_name(name):
     return ' '.join([word for word in name.split() if word not in common_words])
 
-@csrf_exempt
 @login_required(login_url='counselor:login')
 def college_search(request):
     user = request.user 
@@ -449,13 +448,11 @@ def college_search(request):
     
     return render(request, 'college_search.html', context)
 
-@csrf_exempt
+@login_required(login_url='counselor:login')
 def add_college(request):
-    if not request.session.get('logged_in') or not request.session.get('email'):
-        return redirect('counselor:login')
     if request.method == "GET":
         college_name = request.GET.get("college_name")
-        user = User.objects.get(email=request.session["email"])
+        user = request.user
         app = CollegeApplication(
                 user=user, 
                 college=college_name,
@@ -470,12 +467,9 @@ def add_college(request):
         app.save()
         return redirect('counselor:college_search')
 
-@csrf_exempt
+@login_required(login_url='counselor:login')
 def track_application(request, app_id):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
-
-    user = User.objects.get(email=request.session["email"])
+    user = request.user 
     application = get_object_or_404(CollegeApplication, id=app_id, user=user)
 
     if request.method == "POST":
@@ -533,7 +527,7 @@ def track_application(request, app_id):
     })
 
 
-@csrf_exempt
+@login_required(login_url='counselor:login')
 def analyze_essay(request):
     if request.method == "POST":
         try:

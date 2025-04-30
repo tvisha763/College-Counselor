@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inputEl = document.getElementById('chat-input');
     const message = inputEl.value.trim();
+    inputEl.value = '';
     if (!message) return;
 
     isCoolDown = true;
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inputEl.value = '';
   });
 
-  function appendToChat(text, sender) {
+  function appendToChat(text, sender, timestamp) {
     const chatBox = document.getElementById('chat-box');
     const msgDiv = document.createElement('div');
     msgDiv.className = sender;
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     msgDiv.innerHTML = `
       <span class="message">${safeHtml}</span>
-      <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+      <span class="timestamp">${timestamp}</span>
     `;
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -128,24 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error('Network error');
       const { messages } = await res.json();
-      messages.forEach(m => appendToChat(m.message, m.role));
+      messages.forEach(m => appendToChat(m.message, m.role, m.timestamp));
     } catch (err) {
       console.error("Failed to load chat history:", err);
-    }
-  }
-
-  async function saveChatMessage(message, role, pageIdentifier) {
-    try {
-      await fetch("{% url 'counselor_chat:save_chat_message' %}", {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': '{{ csrf_token }}',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message, role, page_identifier: pageIdentifier })
-      });
-    } catch (err) {
-      console.error("Error saving message:", err);
     }
   }
 });
