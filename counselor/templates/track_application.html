@@ -214,102 +214,158 @@
     {% include 'chat_widget.html' %}
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Debugging initialization
+            console.log('Document loaded, initializing essay analysis...');
             
-            // Process all essay feedback divs
-            document.querySelectorAll('.essay-feedback').forEach(contentDiv => {
-                // Save original content to restore if analysis fails
-                const originalContent = contentDiv.innerHTML;
+            // Get CSRF token - works with Django's default templates
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name="csrf-token"]')?.content;
+            
+            if (!csrftoken) {
+                console.error('CSRF token not found! Check your template tags.');
+                return;
+            } else {
+                console.log('CSRF token found:', csrftoken.slice(0, 10) + '...');
+            }
+        
+            // Main analysis function
+            async function analyzeEssayContent(element) {
+                console.log('Starting analysis...');
                 
-                // Handle blur event for analysis
-                contentDiv.addEventListener('blur', function() {
-                    const textContent = this.innerText.trim();
+                const originalContent = element.innerHTML;
+                const textContent = element.innerText.trim();
+                
+                if (textContent.length < 10) {
+                    console.log('Text too short for analysis');
+                    return;
+                }
+                
+                // Show loading state
+                element.innerHTML = originalContent + 
+                    '<div style="color:#999; padding:5px;">Analyzing essay... (this may take 10-20 seconds)</div>';
+                
+                try {
+                    console.log('Sending request with text:', textContent.slice(0, 50) + '...');
                     
-                    if (textContent.length < 10) return;
-                    
-                    // Show loading state
-                    this.innerHTML = originalContent + '<div style="color:#999;font-style:italic;">Analyzing essay...</div>';
-                    
-                    fetch("{% url 'counselor:analyze_essay' %}", {
+                    const startTime = performance.now();
+                    const response = await fetch("{% url 'counselor:analyze_essay' %}", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
-                            "X-CSRFToken": "{{ csrftoken }}"
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "X-Requested-With": "XMLHttpRequest"
                         },
-                        body: JSON.stringify({ text: textContent })
-                    })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Analysis failed');
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (!data.highlights || data.highlights.length === 0) {
-                            this.innerHTML = originalContent;
-                            return;
-                        }
-                        
-                        // Create a temporary div to work with the HTML
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = originalContent;
-                        const textNodes = [];
-                        
-                        // Find all text nodes (ignoring HTML tags)
-                        const walker = document.createTreeWalker(
-                            tempDiv, 
-                            NodeFilter.SHOW_TEXT, 
-                            null, 
-                            false
-                        );
-                        
-                        let node;
-                        while(node = walker.nextNode()) {
-                            textNodes.push(node);
-                        }
-                        
-                        // Process each highlight
-                        data.highlights.forEach(item => {
-                            textNodes.forEach(textNode => {
-                                const text = textNode.nodeValue;
-                                const highlightedText = text.replace(
-                                    new RegExp(escapeRegExp(item.text), 
-                                    `<span class="highlight-tooltip" title="${escapeHtml(item.suggestion)}">$&</span>`
-                                );
-                                
-                                if (highlightedText !== text) {
-                                    const newSpan = document.createElement('span');
-                                    newSpan.innerHTML = highlightedText;
-                                    textNode.parentNode.replaceChild(newSpan, textNode);
-                                }
-                            });
-                        });
-                        
-                        // Update the content
-                        this.innerHTML = tempDiv.innerHTML;
-                    })
-                    .catch(err => {
-                        console.error("Error:", err);
-                        this.innerHTML = originalContent;
+                        body: JSON.stringify({ 
+                            text: textContent,
+                            application_id: element.closest('form')?.querySelector('[name="edit_draft_id"]')?.value
+                        })
                     });
-                });
-                
-                // Handle form submission
-                const form = contentDiv.closest('form');
-                if (form) {
-                    form.addEventListener('submit', function() {
-                        const hiddenInput = this.querySelector('.draft-hidden-input');
-                        if (hiddenInput) {
-                            hiddenInput.value = contentDiv.innerHTML.trim();
-                        }
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    const duration = ((performance.now() - startTime)/1000).toFixed(2);
+                    console.log(`Analysis completed in ${duration}s`, data);
+                    
+                    if (!data.highlights || data.highlights.length === 0) {
+                        element.innerHTML = originalContent;
+                        console.log('No highlights returned from analysis');
+                        return;
+                    }
+                    
+                    // Process highlights while preserving HTML structure
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = originalContent;
+                    
+                    // Case-insensitive highlight without breaking HTML
+                    data.highlights.forEach(item => {
+                        const regex = new RegExp(escapeRegExp(item.text), 'gi');
+                        highlightTextNodes(tempDiv, regex, item.suggestion);
                     });
+                    
+                    element.innerHTML = tempDiv.innerHTML;
+                    initTooltips();
+                    
+                } catch (error) {
+                    console.error('Analysis failed:', error);
+                    element.innerHTML = originalContent;
+                    
+                    // Show error to user
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.color = 'red';
+                    errorDiv.style.padding = '5px';
+                    errorDiv.textContent = 'Analysis failed. Please try again.';
+                    element.parentNode.insertBefore(errorDiv, element.nextSibling);
+                    
+                    setTimeout(() => errorDiv.remove(), 5000);
                 }
-            });
-            
-            // Helper functions
+            }
+        
+            // Helper function to highlight text nodes
+            function highlightTextNodes(element, regex, suggestion) {
+                const treeWalker = document.createTreeWalker(
+                    element, 
+                    NodeFilter.SHOW_TEXT, 
+                    { acceptNode: node => 
+                        node.nodeValue.trim().length > 0 ? 
+                        NodeFilter.FILTER_ACCEPT : 
+                        NodeFilter.FILTER_REJECT 
+                    }
+                );
+                
+                const textNodes = [];
+                while(treeWalker.nextNode()) textNodes.push(treeWalker.currentNode);
+                
+                textNodes.forEach(textNode => {
+                    const newHtml = textNode.nodeValue.replace(
+                        regex,
+                        match => `<span class="highlight-tooltip" title="${escapeHtml(suggestion)}">${match}</span>`
+                    );
+                    
+                    if (newHtml !== textNode.nodeValue) {
+                        const wrapper = document.createElement('span');
+                        wrapper.innerHTML = newHtml;
+                        textNode.parentNode.replaceChild(wrapper, textNode);
+                    }
+                });
+            }
+        
+            // Initialize tooltip hover effects
+            function initTooltips() {
+                document.querySelectorAll('.highlight-tooltip').forEach(tooltip => {
+                    tooltip.addEventListener('mouseenter', showTooltip);
+                    tooltip.addEventListener('mouseleave', hideTooltip);
+                });
+            }
+        
+            function showTooltip(event) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'active-tooltip';
+                tooltip.textContent = this.title;
+                
+                // Position tooltip above the highlight
+                const rect = this.getBoundingClientRect();
+                tooltip.style.position = 'fixed';
+                tooltip.style.left = `${rect.left + window.scrollX}px`;
+                tooltip.style.top = `${rect.top + window.scrollY - 5}px`;
+                tooltip.style.transform = 'translateY(-100%)';
+                
+                document.body.appendChild(tooltip);
+            }
+        
+            function hideTooltip() {
+                document.querySelectorAll('.active-tooltip').forEach(t => t.remove());
+            }
+        
+            // Utility functions
             function escapeRegExp(string) {
                 return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             }
-            
+        
             function escapeHtml(unsafe) {
                 return unsafe
                     .replace(/&/g, "&amp;")
@@ -318,7 +374,64 @@
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#039;");
             }
+        
+            // Set up event listeners
+            document.querySelectorAll('.essay-feedback').forEach(div => {
+                // Blur event for automatic analysis
+                div.addEventListener('blur', function() {
+                    if (!this.dataset.noAutoAnalyze) {
+                        analyzeEssayContent(this);
+                    }
+                });
+                
+                // Manual analysis button (fallback)
+                const analyzeBtn = document.createElement('button');
+                analyzeBtn.className = 'analyze-btn';
+                analyzeBtn.textContent = 'Analyze Essay';
+                analyzeBtn.style.marginTop = '10px';
+                analyzeBtn.onclick = () => analyzeEssayContent(div);
+                
+                div.insertAdjacentElement('afterend', analyzeBtn);
+            });
+        
+            console.log('Essay analysis initialized successfully');
         });
         </script>
+        
+        <style>
+        .highlight-tooltip {
+            background-color: #FFF9C4;
+            border-bottom: 2px dotted #FFA000;
+            position: relative;
+            cursor: help;
+        }
+        
+        .active-tooltip {
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            max-width: 300px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        
+        .analyze-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .analyze-btn:hover {
+            background: #388E3C;
+        }
+        </style>
 </body>
 </html>

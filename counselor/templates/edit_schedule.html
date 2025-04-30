@@ -61,7 +61,7 @@
         {{ class.ib }}
         {{ class.org }}
     {% endfor %}
-    <form action="{% url 'edit_schedule' %}" method="POST">
+    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="grade" value="sophomore">
         <input type="text" placeholder="Class Name" name="name">
@@ -105,7 +105,7 @@
         {{ class.ib }}
         {{ class.org }}
     {% endfor %}
-    <form action="{% url 'edit_schedule' %}" method="POST">
+    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="grade" value="junior">
         <input type="text" placeholder="Class Name" name="name">
@@ -149,7 +149,7 @@
         {{ class.ib }}
         {{ class.org }}
     {% endfor %}
-    <form action="{% url 'edit_schedule' %}" method="POST">
+    <form action="{% url 'counselor:edit_schedule' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="grade" value="senior">
         <input type="text" placeholder="Class Name" name="name">

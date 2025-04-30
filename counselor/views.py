@@ -9,7 +9,7 @@ import bcrypt
 import requests
 import urllib
 import os
-import json
+import re, json
 from datetime import date
 from django.core.mail import send_mail
 from django.conf import settings
@@ -673,6 +673,7 @@ def college_search(request):
     
     return render(request, 'college_search.html', context)
 
+@csrf_exempt
 def add_college(request):
     if not request.session.get('logged_in') or not request.session.get('email'):
         return redirect('counselor:login')
@@ -692,7 +693,8 @@ def add_college(request):
             )
         app.save()
         return redirect('counselor:college_search')
-    
+
+@csrf_exempt
 def track_application(request, app_id):
     if not request.session.get('logged_in'):
         return redirect('counselor:login')
@@ -755,29 +757,33 @@ def track_application(request, app_id):
     })
 
 
-
 @csrf_exempt
 def analyze_essay(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        text = data.get("text", "")
+        try:
+            data = json.loads(request.body)
+            text = data.get("text", "").strip()
 
-        print("📨 Received text:", text)  # Debug incoming text
+            print("📨 Received text:", text[:100])  # Only show first 100 chars for safety
 
-        system_prompt = """
+            if not text:
+                return JsonResponse({"error": "Empty essay text."}, status=400)
+
+            # OpenAI setup
+            client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+            system_prompt = """
             You are an expert college admissions counselor.
             Highlight important parts of the student's college essay and give suggestions for improvement.
-            Return a JSON array with the format:
+            Return ONLY a valid JSON array like this:
             [
-            {"text": "important phrase", "suggestion": "explanation or suggestion"},
-            ...
+              {"text": "important phrase", "suggestion": "reason or suggestion"},
+              ...
             ]
-            Only include relevant suggestions. Do not summarize or add fluff.
-        """
+            Do NOT include any explanation outside the JSON.
+            """
 
-        try:
-            client = OpenAI(api_key=settings.OPENAI_API_KEY)
-            response = client.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -786,15 +792,25 @@ def analyze_essay(request):
                 temperature=0.4,
             )
 
-            raw_content = response.choices[0].message.content.strip()
-            print("🧠 GPT raw content:", raw_content)
+            content = response.choices[0].message.content.strip()
+            print("🧠 GPT raw response:", content)
 
-            import re, json
-            json_match = re.search(r'\[\s*{.*?}\s*\]', raw_content, re.DOTALL)
-            feedback = json.loads(json_match.group()) if json_match else []
+            # Extract just the JSON from GPT response
+            json_match = re.search(r'\[\s*{.*?}\s*\]', content, re.DOTALL)
+            if not json_match:
+                raise ValueError("No valid JSON array found in response.")
 
-            print("✅ Final highlights:", feedback)
-            return JsonResponse({"highlights": feedback})
+            highlights = json.loads(json_match.group())
+            print("✅ Parsed highlights:", highlights)
+
+            return JsonResponse({"highlights": highlights})
+
+        except json.JSONDecodeError as e:
+            print("❌ JSON parsing error:", str(e))
+            return JsonResponse({"error": "Failed to parse GPT response as JSON."}, status=500)
+
         except Exception as e:
-            print("❌ Error in analyze_essay:", str(e))
+            print("❌ General error:", str(e))
             return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Only POST allowed"}, status=405)
