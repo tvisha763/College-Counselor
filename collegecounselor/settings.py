@@ -24,6 +24,8 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+SYSTEM_PROMPTS = env.json("SYSTEM_PROMPTS", default={})
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-gg(8_8@%d@&1ep_c1%5*eau8!@zeh8#6ry^*x5xl_m@6qj!6k^'
 
@@ -91,6 +93,14 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
