@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.conf import settings
 import json
 from django.contrib.auth.models import AbstractUser
+from .managers import CustomUserManager
 
 class Course(models.Model):
     name = models.CharField(max_length=1000)
@@ -141,6 +142,8 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
 
     GRADE = [
         (9, 'Freshman'),

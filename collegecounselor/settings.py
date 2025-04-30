@@ -148,8 +148,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-AUTH_USER_MODEL = 'counselor.User'
-
 # session settings
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_AGE = 259200
