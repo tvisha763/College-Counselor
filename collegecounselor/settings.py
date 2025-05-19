@@ -169,3 +169,6 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost:8000',
 ]
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
