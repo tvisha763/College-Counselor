@@ -1,10 +1,12 @@
-<div class="card  shadow-sm mb-3" >
-  <div class="card-header bg-custom " style="background-color: #af4d98; color: #fef8e6;">
+<div class="card shadow-sm mb-3">
+  <div class="card-header bg-custom" style="background-color: #af4d98; color: #fef8e6;">
     Counselor Pablo
   </div>
+
   <div class="card-body p-3" id="chat-box" style="background-color: #dccea2; max-height: 400px; overflow-y: auto;">
     <!-- messages will be appended here -->
   </div>
+
   <div class="card-footer" style="background-color: #af4d98;">
     <form id="chat-form" class="d-flex">
       {% csrf_token %}
@@ -14,42 +16,82 @@
   </div>
 </div>
 
-
 <style>
   #chat-box .user {
-      background-color: #9DF7E5;
-      color: #000;
-      border-radius: 10px;
-      padding: 10px;
-      margin: 5px 0;
-      max-width: 70%;
-      margin-left: auto;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #9DF7E5;
+    color: #000;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px 0;
+    max-width: 70%;
+    margin-left: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 
   #chat-box .assistant {
-      background-color: #D66BA0;
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px;
-      margin: 5px 0;
-      max-width: 70%;
-      margin-right: auto;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #D66BA0;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px 0;
+    max-width: 70%;
+    margin-right: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 
   .timestamp {
-      font-size: 0.75em;
-      color: #6c757d;
-      text-align: right;
-      display: block;
-      margin-top: 5px;
+    font-size: 0.75em;
+    color: #6c757d;
+    text-align: right;
+    display: block;
+    margin-top: 5px;
   }
 
   #chat-box .user:hover,
   #chat-box .assistant:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* Spinner (3 dots animation) */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px;
+    max-width: 70%;
+    margin-right: auto;
+    background-color: #D66BA0;
+    border-radius: 10px;
+    color: white;
+    margin: 5px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+  }
+
+  .typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes blink {
+    0%, 80%, 100% {
+      opacity: 0;
+    }
+    40% {
+      opacity: 1;
+    }
   }
 </style>
 
@@ -61,12 +103,10 @@
 <script>
 let isCoolDown = false;
 const chatDelay = 1500;
-
 const tutoringSubject = "{{ subject|default:'' }}";
 
 document.addEventListener('DOMContentLoaded', () => {
   const pageIdentifier = "{{ page_identifier }}";
-
   const md = markdownit({ html: false, linkify: true, typographer: true });
 
   loadChatHistory(pageIdentifier);
@@ -85,28 +125,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     appendToChat(message, 'user');
 
-    const aiResp = await fetch("{% url 'counselor_chat:chat' %}", {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `message=${encodeURIComponent(message)}&page_identifier=${encodeURIComponent(pageIdentifier)}&subject=${encodeURIComponent(tutoringSubject)}`
-    });
-    const { reply } = await aiResp.json();
+    const chatBox = document.getElementById('chat-box');
 
-    appendToChat(reply, 'assistant');
+    // Show typing indicator
+    const typingEl = document.createElement('div');
+    typingEl.className = 'typing-indicator';
+    typingEl.id = 'typing-indicator';
+    typingEl.innerHTML = '<span></span><span></span><span></span>';
+    chatBox.appendChild(typingEl);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    inputEl.value = '';
+    try {
+      const aiResp = await fetch("{% url 'counselor_chat:chat' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `message=${encodeURIComponent(message)}&page_identifier=${encodeURIComponent(pageIdentifier)}&subject=${encodeURIComponent(tutoringSubject)}`
+      });
+
+      const { reply } = await aiResp.json();
+
+      // Remove typing indicator
+      typingEl.remove();
+
+      appendToChat(reply, 'assistant');
+    } catch (err) {
+      typingEl.remove();
+      appendToChat('⚠️ There was an error. Please try again later.', 'assistant');
+      console.error(err);
+    }
   });
 
-  function appendToChat(text, sender, timestamp) {
+  function appendToChat(text, sender, timestamp = '') {
     const chatBox = document.getElementById('chat-box');
     const msgDiv = document.createElement('div');
     msgDiv.className = sender;
 
-    let rawHtml = md.render(text);
-    let safeHtml = DOMPurify.sanitize(rawHtml);
+    const rawHtml = markdownit().render(text);
+    const safeHtml = DOMPurify.sanitize(rawHtml);
 
     msgDiv.innerHTML = `
       <span class="message">${safeHtml}</span>
@@ -117,8 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadChatHistory(pageIdentifier) {
-    const url = "{% url 'counselor_chat:get_chat_history' %}"
-      + `?page_identifier=${encodeURIComponent(pageIdentifier)}`;
+    const url = "{% url 'counselor_chat:get_chat_history' %}?page_identifier=" + encodeURIComponent(pageIdentifier);
     try {
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error('Network error');

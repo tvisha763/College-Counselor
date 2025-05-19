@@ -440,8 +440,6 @@ def college_search(request):
 
     target_names = ast.literal_eval(response.choices[0].message.content)
 
-    print(target_names)
-    print(type(target_names))
 
     cleaned_target_names = [clean_name(name) for name in target_names]
 
@@ -617,7 +615,6 @@ def analyze_essay(request):
             data = json.loads(request.body)
             text = data.get("text", "").strip()
 
-            print("📨 Received text:", text[:100])  # Only show first 100 chars for safety
 
             if not text:
                 return JsonResponse({"error": "Empty essay text."}, status=400)
@@ -703,7 +700,6 @@ def analyze_essay(request):
             )
 
             content = response.choices[0].message.content.strip()
-            print("🧠 GPT raw response:", content)
 
             # Extract just the JSON from GPT response
             json_match = re.search(r'\[\s*{.*?}\s*\]', content, re.DOTALL)
@@ -711,16 +707,13 @@ def analyze_essay(request):
                 raise ValueError("No valid JSON array found in response.")
 
             highlights = json.loads(json_match.group())
-            print("✅ Parsed highlights:", highlights)
 
             return JsonResponse({"highlights": highlights})
 
         except json.JSONDecodeError as e:
-            print("❌ JSON parsing error:", str(e))
             return JsonResponse({"error": "Failed to parse GPT response as JSON."}, status=500)
 
         except Exception as e:
-            print("❌ General error:", str(e))
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
