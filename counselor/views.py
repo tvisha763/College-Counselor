@@ -425,7 +425,7 @@ def college_search(request):
             
         ]
 
-        award_str += json.dumps(({'extracurriculars': data})) + " "
+        award_str += json.dumps(({'awards': data})) + " "
 
     
     client = OpenAI(api_key=settings.OPENAI_API_KEY)

@@ -96,7 +96,9 @@
                         {% if awards %}
                             <ul class="list-group list-group-flush">
                                 {% for award in awards %}
-                                    <li class="list-group-item">{{ award.award.name }} - {{ award.award.description }} (Received: {{ award.award.date_received }})</li>
+                                    <li class="list-group-item">
+                                        <strong>{{ award.award.name }} -</strong> {{ award.award.description }} (Received: {{ award.award.date_received }})
+                                    </li>
                                 {% endfor %}
                             </ul>
                         {% else %}
