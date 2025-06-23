@@ -1,10 +1,12 @@
 from django.db import models
+
 from counselor.models import User
+
 
 class ChatHistory(models.Model):
     ROLE_CHOICES = [
-        ('user', 'User'),
-        ('assistant', 'Assistant'),
+        ("user", "User"),
+        ("assistant", "Assistant"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -14,7 +16,8 @@ class ChatHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.email} ({self.role}) @ {self.page_identifier}'
+        return f"{self.user.email} ({self.role}) @ {self.page_identifier}"
+
 
 class SystemPrompt(models.Model):
     page_identifier = models.CharField(max_length=100, unique=True)
