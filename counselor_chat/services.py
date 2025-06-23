@@ -1,7 +1,9 @@
-from openai import OpenAI
 from django.conf import settings
+from openai import OpenAI
+from utils import format_user_context, get_user_context
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
 
 class ChatService:
     def __init__(self, system_prompt, history):
@@ -14,13 +16,18 @@ class ChatService:
         if user:
             context = get_user_context(user)
             context_message = format_user_context(context)
-            messages.append({'role': 'system', 'content': f"User context:\n{context_message}"})
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"User context:\n{context_message}",
+                }
+            )
 
         messages += self.history
         messages.append({"role": "user", "content": user_input})
 
         response = client.chat.completions.create(
-                model="gpt-4",
+            model="gpt-4",
             messages=messages,
         )
 
