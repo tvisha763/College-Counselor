@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'counselor',
     'counselor_chat',
+    'vectordb'
 ]
 
 MIDDLEWARE = [
