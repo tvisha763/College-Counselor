@@ -28,7 +28,9 @@ from django.views.decorators.csrf import csrf_exempt
 from openai import OpenAI
 from rapidfuzz import fuzz, process
 
-from .models import *
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+
 from .utils import (
     GRADE_SCHEDULE_FIELDS,
     get_or_create_course,
@@ -151,33 +153,23 @@ def dashboard(request):
     user = request.user
     applications = CollegeApplication.objects.filter(user=user)
 
-    academic_years = zip(
-        ["Freshman", "Sophomore", "Junior", "Senior"],
-        [
-            user.freshman_schedule,
-            user.sophomore_schedule,
-            user.junior_schedule,
-            user.senior_schedule,
-        ],
-    )
+    academic_years = zip(['Freshman', 'Sophomore', 'Junior', 'Senior'], [user.freshman_schedule, user.sophomore_schedule, user.junior_schedule, user.senior_schedule])
 
-    return render(
-        request,
-        "dashboard.html",
-        {
-            "applications": applications,
-            "user": user,
-            "academic_years": academic_years,
-            "ecs": TakenEC.objects.filter(user=user),
-            "awards": WonAward.objects.filter(user=user),
-        },
-    )
+    return render(request, "dashboard.html", {
+        "applications": applications,
+        "user" : user,
+        "academic_years" : academic_years,
+        "ecs" : TakenEC.objects.filter(user=user),
+        "awards" : WonAward.objects.filter(user=user)
+    })
 
-
-@login_required(login_url="counselor:login")
+@login_required(login_url='counselor:login')
 def edit_profile(request):
+    if not request.session.get('logged_in'):
+        return redirect('counselor:login')
+
     try:
-        user = request.user
+        user = User.objects.get(email=request.session["email"])
     except User.DoesNotExist:
         messages.error(request, "User not found.")
         return redirect("counselor:login")
@@ -277,32 +269,33 @@ def edit_schedule(request):
         )
         return redirect("counselor:edit_schedule")
 
-    if user.freshman_schedule != None:
+    if user.freshman_schedule !=None:
         f_sched = serialize_schedule(user.freshman_schedule)
     else:
         f_sched = None
 
-    if user.sophomore_schedule != None:
+    if user.sophomore_schedule !=None:
         so_sched = serialize_schedule(user.sophomore_schedule)
     else:
         so_sched = None
 
-    if user.junior_schedule != None:
+    if user.junior_schedule !=None:
         j_sched = serialize_schedule(user.junior_schedule)
     else:
         j_sched = None
 
-    if user.senior_schedule != None:
+    if user.senior_schedule !=None:
         se_sched = serialize_schedule(user.senior_schedule)
     else:
         se_sched = None
 
     context = {
-        "freshman_sched": f_sched,
-        "sophomore_sched": so_sched,
-        "junior_sched": j_sched,
-        "senior_sched": se_sched,
-        "grade_options": ["A", "B", "C", "D", "F"],
+        'freshman_sched':  f_sched,
+        'sophomore_sched': so_sched,
+        'junior_sched':    j_sched,
+        'senior_sched':    se_sched,
+        'grade_options' : ['A', 'B', 'C', 'D', 'F']
+
     }
     return render(request, "edit_schedule.html", context)
 
@@ -352,60 +345,54 @@ def edit_extracurriculars(request):
     awards = user.awards.all()
 
     TYPE = [
-        (1, "Academic"),
-        (2, "Athletics: Club"),
-        (3, "Athletics: JV/Varsity"),
-        (4, "Career Oriented"),
-        (5, "Community Service (Volunteer)"),
-        (6, "Computer/Technology"),
-        (7, "Cultural"),
-        (8, "Dance"),
-        (9, "Debate/Speech"),
-        (10, "Environmental"),
-        (11, "Family Responsibilities"),
-        (12, "Foreign Exchange"),
-        (13, "Foreign Language"),
-        (14, "Internship"),
-        (15, "Journalism/Publication"),
-        (16, "Junior ROTC"),
-        (17, "LGBTQIA+"),
-        (18, "Music: Instrumental"),
-        (19, "Music: Vocal"),
-        (20, "Religious"),
-        (21, "Research"),
-        (22, "Robotics"),
-        (23, "School Spirit"),
-        (24, "Science/Math"),
-        (25, "Social Justice"),
-        (26, "Theater/Drama"),
-        (27, "Work (Paid)"),
-        (28, "Other Club/Activity"),
+        (1, 'Academic'),
+        (2, 'Athletics: Club'),
+        (3, 'Athletics: JV/Varsity'),
+        (4, 'Career Oriented'),
+        (5, 'Community Service (Volunteer)'),
+        (6, 'Computer/Technology'),
+        (7, 'Cultural'),
+        (8, 'Dance'),
+        (9, 'Debate/Speech'),
+        (10, 'Environmental'),
+        (11, 'Family Responsibilities'),
+        (12, 'Foreign Exchange'),
+        (13, 'Foreign Language'),
+        (14, 'Internship'),
+        (15, 'Journalism/Publication'),
+        (16, 'Junior ROTC'),
+        (17, 'LGBTQIA+'),
+        (18, 'Music: Instrumental'),
+        (19, 'Music: Vocal'),
+        (20, 'Religious'),
+        (21, 'Research'),
+        (22, 'Robotics'),
+        (23, 'School Spirit'),
+        (24, 'Science/Math'),
+        (25, 'Social Justice'),
+        (26, 'Theater/Drama'),
+        (27, 'Work (Paid)'),
+        (28, 'Other Club/Activity'),
     ]
 
-    return render(
-        request,
-        "edit_extracurriculars.html",
-        {
-            "extracurriculars": extracurriculars,
-            "awards": awards,
-            "extracurricular_types": TYPE,
-        },
-    )
-
+    return render(request, 'edit_extracurriculars.html', {
+        'extracurriculars': extracurriculars,
+        'awards': awards,
+        'extracurricular_types' : TYPE
+    })
 
 def get_sched_data(sched):
     if sched != None:
         sched_data = {
-            "grades": sched.grades,
-            "ap scores": sched.ap_scores,
-            "ib scores": sched.ib_scores,
-            "sem1 gpa": sched.sem1_gpa,
-            "sem2 gpa": sched.sem2_gpa,
+            "grades" : sched.grades,
+            "ap scores" : sched.ap_scores,
+            "ib scores" : sched.ib_scores,
+            "sem1 gpa" : sched.sem1_gpa,
+            "sem2 gpa" : sched.sem2_gpa
         }
-        return sched_data
+        return(sched_data)
     else:
-        return {"data": "No Data"}
-
+        return({"data":"No Data"})
 
 common_words = [
     "University",
@@ -424,9 +411,9 @@ def clean_name(name):
     return " ".join([word for word in name.split() if word not in common_words])
 
 
-@login_required(login_url="counselor:login")
+@login_required(login_url='counselor:login')
 def college_search(request):
-    user = request.user
+    user = request.user 
 
     file_path = os.path.join(
         settings.BASE_DIR, "counselor", "static", "College.csv"
@@ -480,9 +467,8 @@ def college_search(request):
             self.personal_spending = personal_spending
             self.s_f_ratio = s_f_ratio
             self.grad_rate = grad_rate
-            self.acceptance_rate = (
-                round((accept / apps * 100), 2) if apps > 0 else 0
-            )
+            self.acceptance_rate = round((accept / apps * 100), 2) if apps > 0 else 0
+
 
     colleges = []
 
@@ -503,45 +489,38 @@ def college_search(request):
         "act": user.act,
     }
 
+
+
     ec_str = ""
     for ec in TakenEC.objects.filter(user=user):
         data = [
             {
-                "name": ec.extracurricular.name,
-                "description": ec.extracurricular.description,
-                "position": ec.extracurricular.position,
-                "type": ec.extracurricular.get_type_display(),  # convert choice field to readable string
-                "start_date": (
-                    ec.extracurricular.start_date.isoformat()
-                    if ec.extracurricular.start_date
-                    else None
-                ),
-                "end_date": (
-                    ec.extracurricular.end_date.isoformat()
-                    if ec.extracurricular.end_date
-                    else None
-                ),
+                'name': ec.extracurricular.name,
+                'description': ec.extracurricular.description,
+                'position': ec.extracurricular.position,
+                'type': ec.extracurricular.get_type_display(),  # convert choice field to readable string
+                'start_date': ec.extracurricular.start_date.isoformat() if ec.extracurricular.start_date else None,
+                'end_date': ec.extracurricular.end_date.isoformat() if ec.extracurricular.end_date else None,
             }
+            
         ]
 
-        ec_str += json.dumps(({"extracurriculars": data})) + " "
+        ec_str += json.dumps(({'extracurriculars': data})) + " "
 
     award_str = ""
     for a in WonAward.objects.filter(user=user):
         data = [
             {
-                "name": a.award.name,
-                "description": a.award.description,
-                "date_received": (
-                    a.award.date_received.isoformat()
-                    if a.award.date_received
-                    else None
-                ),
+                'name': a.award.name,
+                'description': a.award.description,
+                'date_received': a.award.date_received.isoformat() if a.award.date_received else None,
             }
+            
         ]
 
-        award_str += json.dumps(({"awards": data})) + " "
+        award_str += json.dumps(({'awards': data})) + " "
 
+    
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
     response = client.chat.completions.create(
         model="gpt-4",
@@ -568,6 +547,7 @@ def college_search(request):
     )
 
     target_names = ast.literal_eval(response.choices[0].message.content)
+
 
     cleaned_target_names = [clean_name(name) for name in target_names]
 
@@ -661,11 +641,13 @@ def college_search(request):
     return render(request, "college_search.html", context)
 
 
-@login_required(login_url="counselor:login")
+@login_required(login_url='counselor:login')
 def add_college(request):
-    if request.method == "POST":
-        college_name = request.POST.get("college_name")
-        user = request.user
+    if not request.session.get('logged_in') or not request.session.get('email'):
+        return redirect('counselor:login')
+    if request.method == "GET":
+        college_name = request.GET.get("college_name")
+        user = User.objects.get(email=request.session["email"])
         app = CollegeApplication(
             user=user,
             college=college_name,
@@ -681,9 +663,9 @@ def add_college(request):
         return redirect("counselor:college_search")
 
 
-@login_required(login_url="counselor:login")
+@login_required(login_url='counselor:login')
 def track_application(request, app_id):
-    user = request.user
+    user = request.user 
     application = get_object_or_404(CollegeApplication, id=app_id, user=user)
 
     if request.method == "POST":
@@ -762,13 +744,13 @@ def track_application(request, app_id):
     )
 
 
-@login_required(login_url="counselor:login")
+@login_required(login_url='counselor:login')
 def analyze_essay(request):
-    user = request.user
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             text = data.get("text", "").strip()
+
 
             if not text:
                 return JsonResponse({"error": "Empty essay text."}, status=400)
@@ -777,60 +759,50 @@ def analyze_essay(request):
             client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
             user_data = {
-                "school": user.school,
-                "grade": user.GRADE[user.grade - 9][1],
-                "location": user.location,
-                "citizenship": user.CITIZENSHIP[user.citizenship_status - 1][1],
-                "college goals": user.college_goals,
-                "major goals": user.major_goals,
-                "class rank": user.class_rank,
-                "class size": user.class_size,
-                "first gen status": user.FIRST_GEN[user.first_gen - 1][1],
-                "ethnicity": user.ethnicity,
-                "gender": user.gender,
-                "psat": user.psat,
-                "sat": user.sat,
-                "act": user.act,
+                'school': user.school,
+                'grade': user.GRADE[user.grade-9][1],
+                'location': user.location,
+                'citizenship' : user.CITIZENSHIP[user.citizenship_status-1][1],
+                'college goals' : user.college_goals,
+                'major goals' : user.major_goals,
+                'class rank' : user.class_rank,
+                'class size' : user.class_size,
+                'first gen status' : user.FIRST_GEN[user.first_gen-1][1],
+                'ethnicity' : user.ethnicity,
+                'gender' : user.gender,
+                'psat' : user.psat,
+                'sat' : user.sat,
+                'act' : user.act
             }
 
             ec_str = ""
             for ec in TakenEC.objects.filter(user=user):
                 data = [
                     {
-                        "name": ec.extracurricular.name,
-                        "description": ec.extracurricular.description,
-                        "position": ec.extracurricular.position,
-                        "type": ec.extracurricular.get_type_display(),  # convert choice field to readable string
-                        "start_date": (
-                            ec.extracurricular.start_date.isoformat()
-                            if ec.extracurricular.start_date
-                            else None
-                        ),
-                        "end_date": (
-                            ec.extracurricular.end_date.isoformat()
-                            if ec.extracurricular.end_date
-                            else None
-                        ),
+                        'name': ec.extracurricular.name,
+                        'description': ec.extracurricular.description,
+                        'position': ec.extracurricular.position,
+                        'type': ec.extracurricular.get_type_display(),  # convert choice field to readable string
+                        'start_date': ec.extracurricular.start_date.isoformat() if ec.extracurricular.start_date else None,
+                        'end_date': ec.extracurricular.end_date.isoformat() if ec.extracurricular.end_date else None,
                     }
+                    
                 ]
 
-                ec_str += json.dumps(({"extracurriculars": data})) + " "
+                ec_str += json.dumps(({'extracurriculars': data})) + " "
 
             award_str = ""
             for a in WonAward.objects.filter(user=user):
                 data = [
                     {
-                        "name": a.award.name,
-                        "description": a.award.description,
-                        "date_received": (
-                            a.award.date_received.isoformat()
-                            if a.award.date_received
-                            else None
-                        ),
+                        'name': a.award.name,
+                        'description': a.award.description,
+                        'date_received': a.award.date_received.isoformat() if a.award.date_received else None,
                     }
+                    
                 ]
 
-                award_str += json.dumps(({"extracurriculars": data})) + " "
+                award_str += json.dumps(({'extracurriculars': data})) + " "
 
             # Prompt emphasizes using exact substrings from essay
             system_prompt = (
@@ -853,22 +825,7 @@ def analyze_essay(request):
                 - Limit each highlighted 'text' to one sentence or phrase (around 5–20 words).
                 - Include no more than 10 suggestions. Fewer than 10 is also fine. 10 is just the upper limit.
                 - Only offer a suggestion if something should be changed
-            """
-                + "User Profile: "
-                + json.dumps(user_data)
-                + "\n Freshman Schedule: "
-                + json.dumps(get_sched_data(user.freshman_schedule))
-                + "\n Sophomore Schedule: "
-                + json.dumps(get_sched_data(user.sophomore_schedule))
-                + "\n Junior Schedule: "
-                + json.dumps(get_sched_data(user.junior_schedule))
-                + "\n Senior Schedule: "
-                + json.dumps(get_sched_data(user.senior_schedule))
-                + "\n Extracurriculars: "
-                + ec_str
-                + "\n Awards"
-                + award_str
-            )
+            """ + "User Profile: " + json.dumps(user_data) + "\n Freshman Schedule: " + json.dumps(get_sched_data(user.freshman_schedule)) + "\n Sophomore Schedule: " + json.dumps(get_sched_data(user.sophomore_schedule)) + "\n Junior Schedule: " + json.dumps(get_sched_data(user.junior_schedule)) + "\n Senior Schedule: " + json.dumps(get_sched_data(user.senior_schedule)) + "\n Extracurriculars: " + ec_str + "\n Awards" + award_str
 
             response = client.chat.completions.create(
                 model="gpt-4",
@@ -880,6 +837,7 @@ def analyze_essay(request):
             )
 
             content = response.choices[0].message.content.strip()
+            print("🧠 GPT raw response:", content)
 
             # Extract just the JSON from GPT response
             json_match = re.search(r"\[\s*{.*?}\s*\]", content, re.DOTALL)
@@ -887,25 +845,24 @@ def analyze_essay(request):
                 raise ValueError("No valid JSON array found in response.")
 
             highlights = json.loads(json_match.group())
+            print("✅ Parsed highlights:", highlights)
 
             return JsonResponse({"highlights": highlights})
 
         except json.JSONDecodeError as e:
-            return JsonResponse(
-                {"error": "Failed to parse GPT response as JSON."}, status=500
-            )
+            return JsonResponse({"error": "Failed to parse GPT response as JSON."}, status=500)
 
         except Exception as e:
+            print("❌ General error:", str(e))
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 
-@login_required(login_url="counselor:login")
+@login_required(login_url='counselor:login')
 def tutoring(request):
     subject = request.POST.get("subject", "")
-    return render(
-        request,
-        "tutoring.html",
-        {"page_identifier": "_tutoring", "subject": subject},
-    )
+    return render(request, 'tutoring.html', {
+        'page_identifier': '_tutoring',
+        'subject': subject
+    })
