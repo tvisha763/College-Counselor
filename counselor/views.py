@@ -6,7 +6,24 @@ import urllib
 from contextvars import Context
 from datetime import date
 from operator import contains
-
+from .models import (
+    Award,
+    AwardAdmin,
+    CollegeApplication,
+    Course,
+    CourseAdmin,
+    ECAdmin,
+    EssayDraft,
+    Extracurricular,
+    Schedule,
+    ScheduleAdmin,
+    Scholarship,
+    User,
+    TakenCourse,
+    TakenEC,
+    WonAward,
+    UserAdmin,
+)
 import bcrypt
 import pandas as pd
 import requests
@@ -805,8 +822,7 @@ def analyze_essay(request):
                 award_str += json.dumps(({'extracurriculars': data})) + " "
 
             # Prompt emphasizes using exact substrings from essay
-            system_prompt = (
-                """
+            system_prompt = """
                 You are an expert college admissions counselor.
 
                 You will be given a student's college essay. Your task is to extract exact sentences or phrases directly from the essay that are either:

@@ -102,7 +102,6 @@ DATABASES = {
 
 PASSWORD_HASHERS = [
     "counselor.hashers.CustomArgon2PasswordHasher",
-    "django.contrib.auth.hashers.ScryptPasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
     "django.contrib.auth.hashers.Argon2PasswordHasher",
