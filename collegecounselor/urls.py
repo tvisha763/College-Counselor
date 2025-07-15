@@ -21,7 +21,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin_pip_install_argon2-cffi-525fcda6-52cb-4f4d-99d9-5f4b6803cfc7/", admin.site.urls),
     path(r"", include("counselor.urls")),
     path(r"", include("counselor_chat.urls")),
 ]

@@ -19,9 +19,16 @@ from .models import (
     ScheduleAdmin,
     Scholarship,
     User,
+<<<<<<< HEAD
     UserAdmin,
     TakenEC,
     WonAward,
+=======
+    TakenCourse,
+    TakenEC,
+    WonAward,
+    UserAdmin,
+>>>>>>> 2b4c8324f325d8d008e288e8d0f3a935f00f2d32
 )
 import bcrypt
 import pandas as pd

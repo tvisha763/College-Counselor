@@ -42,16 +42,16 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'counselor',
-    'counselor_chat',
-    'collegecounselor',
-    'vectordb'
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "counselor",
+    "counselor_chat",
+    "collegecounselor",
+    "vectordb",
 ]
 
 MIDDLEWARE = [
@@ -102,8 +102,7 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.Argon2PasswordHasher",
-    "django.contrib.auth.hashers.ScryptPasswordHasher",
+    "counselor.hashers.CustomArgon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -176,4 +175,3 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
