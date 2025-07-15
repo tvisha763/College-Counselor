@@ -14,6 +14,8 @@ from .models import (
     Scholarship,
     User,
     UserAdmin,
+    TakenEC,
+    WonAward,
 )
 
 # Register your models here.

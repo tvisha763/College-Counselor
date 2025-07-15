@@ -6,7 +6,23 @@ import urllib
 from contextvars import Context
 from datetime import date
 from operator import contains
-
+from .models import (
+    Award,
+    AwardAdmin,
+    CollegeApplication,
+    Course,
+    CourseAdmin,
+    ECAdmin,
+    EssayDraft,
+    Extracurricular,
+    Schedule,
+    ScheduleAdmin,
+    Scholarship,
+    User,
+    UserAdmin,
+    TakenEC,
+    WonAward,
+)
 import bcrypt
 import pandas as pd
 import requests
@@ -133,6 +149,8 @@ def login(request):
             return redirect("counselor:login")
 
         auth_login(request, user)
+        request.session["email"] = user.email
+        request.session["logged_in"] = True
         return redirect("counselor:dashboard")
 
     return render(request, "auth/login.html")
@@ -165,9 +183,6 @@ def dashboard(request):
 
 @login_required(login_url='counselor:login')
 def edit_profile(request):
-    if not request.session.get('logged_in'):
-        return redirect('counselor:login')
-
     try:
         user = User.objects.get(email=request.session["email"])
     except User.DoesNotExist:
@@ -805,8 +820,7 @@ def analyze_essay(request):
                 award_str += json.dumps(({'extracurriculars': data})) + " "
 
             # Prompt emphasizes using exact substrings from essay
-            system_prompt = (
-                """
+            system_prompt = """
                 You are an expert college admissions counselor.
 
                 You will be given a student's college essay. Your task is to extract exact sentences or phrases directly from the essay that are either:

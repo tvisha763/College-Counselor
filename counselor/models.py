@@ -1,4 +1,5 @@
 import json
+from typing import override
 
 from django.conf import settings
 from django.contrib import admin
@@ -16,6 +17,7 @@ class Course(models.Model):
     type = models.IntegerField(default=9, choices=TYPE, blank=True, null=True)
     organization = models.CharField(max_length=1000, blank=True, null=True)
 
+    @override(__str__)
     def __str__(self):
         return "%s - %s" % (self.name, self.type)
 
@@ -76,6 +78,17 @@ class Schedule(models.Model):
         self.sem1_gpa = self.calculate_gpa(grades.get("sem1"))
         self.sem2_gpa = self.calculate_gpa(grades.get("sem2"))
         super().save(*args, **kwargs)
+
+    def get_vectordb_text(self):
+        return f"{self.user.email} -- {self.role} -- {self.page_identifier} -- {self.message}"
+
+    def get_vectordb_metadata(self):
+        return {
+            "user_id": self.user.id,
+            "role": self.role,
+            "page_identifier": self.page_identifier,
+            "timestamp": self.timestamp.isoformat(),
+        }
 
 
 class TakenCourse(models.Model):
@@ -166,7 +179,7 @@ class User(AbstractUser):
 
     GRADE = [(9, "Freshman"), (10, "Sophomore"), (11, "Junior"), (12, "Senior")]
     grade = models.IntegerField(choices=GRADE, default=9)
-    location = models.CharField(max_length=1000)
+    location = models.CharField(max_length=1000, blank=True, null=True)
 
     CITIZENSHIP = [
         (1, "Citizen"),
