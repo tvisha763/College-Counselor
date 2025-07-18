@@ -17,7 +17,6 @@ class Course(models.Model):
     type = models.IntegerField(default=9, choices=TYPE, blank=True, null=True)
     organization = models.CharField(max_length=1000, blank=True, null=True)
 
-    @override(__str__)
     def __str__(self):
         return "%s - %s" % (self.name, self.type)
 
