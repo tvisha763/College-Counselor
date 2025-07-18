@@ -1,0 +1,7 @@
+1. script to generate test accounts
+2. metadata generated using gpt or something
+3. custom llm running locally (llama?)
+4. improve college search
+    - embed colleges + vectordb search
+5. colin get copilot on neovim
+6. 
