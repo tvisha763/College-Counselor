@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/auth1.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/auth2.css' %}">
     <title>Log In</title>
 </head>
 <body>
 
     
-    <div class="login-dark">
+    <div class="login-dark" style="opacity: 08;">
         
         <form method="post" action="{% url 'counselor:login' %}">
             {% csrf_token %}

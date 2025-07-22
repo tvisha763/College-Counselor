@@ -12,7 +12,7 @@ from counselor.models import User
 from .models import ChatHistory
 from .services import ChatService
 from .system_prompts import generate_system_prompt
-from .utils import get_session_history, store_in_session
+from .utils import get_session_history, store_in_session, get_openai_client
 
 
 @login_required(login_url="counselor:login")

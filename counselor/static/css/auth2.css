@@ -15,7 +15,7 @@
     width:100%;
     padding-top:10px;
     padding-bottom:40px;
-    background-color:#d66ba0;
+    background-color:rgba(214, 107, 160, 0.8);
     padding-left:40px;
     padding-right:40px;
     border-radius:4px;
@@ -25,7 +25,7 @@
     left:50%;
     position: fixed;
     color:#fff;
-    box-shadow:3px 3px 4px rgba(0,0,0,0.2);
+    box-shadow:3px 3px 4px rgba(0, 0, 0, 0.2);
   }
   
   .login-dark .illustration {

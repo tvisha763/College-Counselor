@@ -2,9 +2,11 @@ import json
 
 from django.conf import settings
 from openai import OpenAI
+import requests
 
 from counselor.models import CollegeApplication, TakenEC, WonAward
 
+from .utils import *
 
 def store_in_session(request, page_identifier, role, message):
     session_key = f"chat_{page_identifier}"
@@ -238,6 +240,19 @@ def format_user_context(context):
 
     return "\n".join(parts)
 
+def ollama_chat(messages, model="llama3"):
+    response = requests.post(
+        "http://localhost:11434/api/chat",
+        json={
+            "model": model,
+            "messages": messages,
+            "stream": False,
+        }
+    )
+    response.raise_for_status()
+    return response.json()["message"]["content"]
+
+CLIENT = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 def get_openai_client():
-    return OpenAI(api_key=settings.OPENAI_API_KEY)
+    return CLIENT

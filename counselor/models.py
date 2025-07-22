@@ -185,7 +185,7 @@ class User(AbstractUser):
         (3, "Visa"),
         (4, "International"),
     ]
-    citizenship_status = models.IntegerField(choices=CITIZENSHIP, default=1)
+    citizenship_status = models.IntegerField(choices=CITIZENSHIP, blank=True, null=True)
 
     college_goals = models.TextField(blank=True, null=True)
     major_goals = models.TextField(blank=True, null=True)
@@ -196,7 +196,7 @@ class User(AbstractUser):
     class_size = models.IntegerField(blank=True, null=True)
 
     FIRST_GEN = [(1, "Not First Gen"), (2, "First Gen")]
-    first_gen = models.IntegerField(choices=FIRST_GEN, default=1)
+    first_gen = models.IntegerField(choices=FIRST_GEN, blank=True, null=True)
 
     ethnicity = models.CharField(max_length=1000, blank=True, null=True)
     gender = models.CharField(max_length=1000, blank=True, null=True)
@@ -238,6 +238,7 @@ class User(AbstractUser):
         "Extracurricular", through="TakenEC", blank=True
     )
     awards = models.ManyToManyField("Award", through="WonAward", blank=True)
+    intro_message = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.fname} {self.lname} - {self.get_grade_display()}"

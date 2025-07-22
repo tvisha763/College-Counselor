@@ -1,7 +1,16 @@
-1. script to generate test accounts
 2. metadata generated using gpt or something
 3. custom llm running locally (llama?)
-4. improve college search
+4. improve college search - loading
     - embed colleges + vectordb search
 5. colin get copilot on neovim
-6. 
+6. crazy anecdotes
+7. style the intro_message
+8. make the intro_message into a notification/message
+9. email summaries
+10. password view grade_options
+11. logging, collect more data
+12. async college search
+13. export data/delete data/import data???
+14. forgot password
+15. documentation
+16. usage stats

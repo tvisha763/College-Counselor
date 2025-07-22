@@ -6,6 +6,20 @@
     <div class="container mt-5">
         
         <h1 class="text-center mb-4" style="color: #d66ba0;">Welcome to Your AI College Counselor Dashboard</h1>
+
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <img src="..." class="rounded me-2" alt="...">
+                <strong class="me-auto">Bootstrap</strong>
+                <small>11 mins ago</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{user.intro_message}}
+            </div>
+        </div>
+
+        
         {% include 'chat_widget.html' %}
         <div class="row">
             <!-- Left Column -->
