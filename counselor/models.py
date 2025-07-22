@@ -176,8 +176,8 @@ class User(AbstractUser):
     objects = CustomUserManager()
 
     GRADE = [(9, "Freshman"), (10, "Sophomore"), (11, "Junior"), (12, "Senior")]
-    grade = models.IntegerField(choices=GRADE, default=9)
-    location = models.CharField(max_length=1000, blank=True, null=True)
+    grade = models.IntegerField(choices=GRADE, blank=True, null=True)
+    location = models.CharField(default="", max_length=1000, blank=True, null=True)
 
     CITIZENSHIP = [
         (1, "Citizen"),
@@ -238,7 +238,7 @@ class User(AbstractUser):
         "Extracurricular", through="TakenEC", blank=True
     )
     awards = models.ManyToManyField("Award", through="WonAward", blank=True)
-    intro_message = models.TextField(blank=True, null=True)
+    intro_message = models.TextField(default="Welcome to Counselor Pablo College Counseling. Edit your profile to see your personalized intro message.", blank=True, null=True)
 
     def __str__(self):
         return f"{self.fname} {self.lname} - {self.get_grade_display()}"

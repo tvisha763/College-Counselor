@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-    function appendToChat(text, sender, timestamp = '') {
+    function appendToChat(text, sender, timestamp = '', isHistory = false) {
       const chatBox = document.getElementById('chat-box');
       const msgDiv = document.createElement('div');
       msgDiv.className = sender;
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       msgDiv.appendChild(spanTimestamp);
       chatBox.appendChild(msgDiv);
 
-      if (sender === 'assistant') {
+      if (sender === 'assistant' && !isHistory) {
         let i = 0;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = safeHtml;
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (i <= fullText.length) {
             spanMessage.textContent = fullText.slice(0, i++);
             chatBox.scrollTop = chatBox.scrollHeight;
-            setTimeout(typeChar, 15);
+            setTimeout(typeChar, 3);
           }
         }
 
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error('Network error');
       const { messages } = await res.json();
-      messages.forEach(m => appendToChat(m.message, m.role, m.timestamp));
+      messages.forEach(m => appendToChat(m.message, m.role, m.timestamp, true));
     } catch (err) {
       console.error("Failed to load chat history:", err);
     }

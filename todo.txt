@@ -2,15 +2,14 @@
 3. custom llm running locally (llama?)
 4. improve college search - loading
     - embed colleges + vectordb search
-5. colin get copilot on neovim
-6. crazy anecdotes
-7. style the intro_message
-8. make the intro_message into a notification/message
 9. email summaries
-10. password view grade_options
+10. password view
+18. grade_options
 11. logging, collect more data
 12. async college search
 13. export data/delete data/import data???
 14. forgot password
 15. documentation
 16. usage stats
+17. email updates
+    - include reminders on staying up to date
