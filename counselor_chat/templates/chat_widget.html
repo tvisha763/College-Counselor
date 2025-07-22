@@ -24,20 +24,39 @@
     padding: 10px;
     margin: 5px 0;
     max-width: 70%;
+    width: fit-content;
     margin-left: auto;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 
-  #chat-box .assistant {
-    background-color: #D66BA0;
-    color: #fff;
-    border-radius: 10px;
-    padding: 10px;
-    margin: 5px 0;
-    max-width: 70%;
-    margin-right: auto;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+#chat-box .assistant {
+  background-color: #D66BA0;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px 0;
+  max-width: 60%;
+  margin-right: auto;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  opacity: 0;
+  transform: scaleY(0.95);
+  animation: fadeInGrow 0.3s ease-out forwards;
+}
+
+@keyframes fadeInGrow {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95);
   }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
 
   .timestamp {
     font-size: 0.75em;
@@ -107,8 +126,12 @@ const tutoringSubject = "{{ subject|default:'' }}";
 
 document.addEventListener('DOMContentLoaded', () => {
   const pageIdentifier = "{{ page_identifier }}";
-  const md = markdownit({ html: false, linkify: true, typographer: true });
-
+  const md = window.markdownit({
+  breaks: true,
+  html: false,
+  linkify: true,
+  typographer: true
+})
   loadChatHistory(pageIdentifier);
 
   document.getElementById('chat-form').addEventListener('submit', async e => {
@@ -158,21 +181,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function appendToChat(text, sender, timestamp = '') {
-    const chatBox = document.getElementById('chat-box');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = sender;
+    function appendToChat(text, sender, timestamp = '') {
+      const chatBox = document.getElementById('chat-box');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = sender;
 
-    const rawHtml = markdownit().render(text);
-    const safeHtml = DOMPurify.sanitize(rawHtml);
+      const rawHtml = md.render(text);
+      const safeHtml = DOMPurify.sanitize(rawHtml);
 
-    msgDiv.innerHTML = `
-      <span class="message">${safeHtml}</span>
-      <span class="timestamp">${timestamp}</span>
-    `;
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+      const spanMessage = document.createElement('span');
+      spanMessage.className = 'message';
+
+      const spanTimestamp = document.createElement('span');
+      spanTimestamp.className = 'timestamp';
+      spanTimestamp.textContent = timestamp;
+
+      msgDiv.appendChild(spanMessage);
+      msgDiv.appendChild(spanTimestamp);
+      chatBox.appendChild(msgDiv);
+
+      if (sender === 'assistant') {
+        let i = 0;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = safeHtml;
+        const fullText = tempDiv.textContent || tempDiv.innerText || '';
+
+        function typeChar() {
+          if (i <= fullText.length) {
+            spanMessage.textContent = fullText.slice(0, i++);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            setTimeout(typeChar, 15);
+          }
+        }
+
+        typeChar();
+      } else {
+        spanMessage.innerHTML = safeHtml;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
 
   async function loadChatHistory(pageIdentifier) {
     const url = "{% url 'counselor_chat:get_chat_history' %}?page_identifier=" + encodeURIComponent(pageIdentifier);
