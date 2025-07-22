@@ -23,6 +23,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.templatetags.static import static
+from email.mime.image import MIMEImage
+from django.core.mail import EmailMultiAlternatives
 from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from openai import OpenAI
@@ -52,6 +54,7 @@ from .utils import (
     serialize_schedule,
     update_schedule_entry,
 )
+from counselor_chat.utils import get_openai_client
 
 
 def home(request):
@@ -248,6 +251,35 @@ def edit_profile(request):
             setattr(user, key, value)
 
         user.save()
+
+        client = get_openai_client()
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an AI college counselor named Counselor Pablo. Generate a personalized introduction message for the user based on their profile, especially college and major goals. Tell them what they need to know for their college journey and how you can help them. Use the following user profile information:g to apply for college, and base information that college counselors typically explain on the first session.",
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(
+                        {
+                            "fname": user.fname,
+                            "lname": user.lname,
+                            "grade": user.get_grade_display(),
+                            "college_goals": user.college_goals,
+                            "major_goals": user.major_goals,
+                            "class_rank": user.class_rank,
+                            "class_size": user.class_size
+                        }
+                    ),
+                },
+            ],
+        )
+
+        user.intro_message = response.choices[0].message.content.strip()
+        user.save()
+
         messages.success(request, "Profile updated successfully.")
         return redirect("counselor:edit_profile")
 
@@ -784,6 +816,7 @@ def track_application(request, app_id):
 
 @login_required(login_url="counselor:login")
 def analyze_essay(request):
+    user = request.user
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -793,7 +826,7 @@ def analyze_essay(request):
                 return JsonResponse({"error": "Empty essay text."}, status=400)
 
             # OpenAI setup
-            client = OpenAI(api_key=settings.OPENAI_API_KEY)
+            client = get_openai_client()
 
             user_data = {
                 "school": user.school,
@@ -852,8 +885,7 @@ def analyze_essay(request):
                 award_str += json.dumps(({"extracurriculars": data})) + " "
 
             # Prompt emphasizes using exact substrings from essay
-            system_prompt = (
-                """
+            system_prompt = """
                 You are an expert college admissions counselor.
 
                 You will be given a student's college essay. Your task is to extract exact sentences or phrases directly from the essay that are either:
@@ -872,22 +904,7 @@ def analyze_essay(request):
                 - Limit each highlighted 'text' to one sentence or phrase (around 5–20 words).
                 - Include no more than 10 suggestions. Fewer than 10 is also fine. 10 is just the upper limit.
                 - Only offer a suggestion if something should be changed
-            """
-                + "User Profile: "
-                + json.dumps(user_data)
-                + "\n Freshman Schedule: "
-                + json.dumps(get_sched_data(user.freshman_schedule))
-                + "\n Sophomore Schedule: "
-                + json.dumps(get_sched_data(user.sophomore_schedule))
-                + "\n Junior Schedule: "
-                + json.dumps(get_sched_data(user.junior_schedule))
-                + "\n Senior Schedule: "
-                + json.dumps(get_sched_data(user.senior_schedule))
-                + "\n Extracurriculars: "
-                + ec_str
-                + "\n Awards"
-                + award_str
-            )
+                """ + "User Profile: " + json.dumps(user_data) + "\n Freshman Schedule: " + json.dumps(get_sched_data(user.freshman_schedule)) + "\n Sophomore Schedule: " + json.dumps(get_sched_data(user.sophomore_schedule)) + "\n Junior Schedule: " + json.dumps(get_sched_data(user.junior_schedule)) + "\n Senior Schedule: " + json.dumps(get_sched_data(user.senior_schedule)) + "\n Extracurriculars: " + ec_str + "\n Awards" + award_str
 
             response = client.chat.completions.create(
                 model="gpt-4",

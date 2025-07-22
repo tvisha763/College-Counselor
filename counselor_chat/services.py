@@ -1,13 +1,7 @@
 from django.conf import settings
 from openai import OpenAI
 
-from counselor_chat.utils import (
-    format_user_context,
-    get_openai_client,
-    get_user_context,
-)
-
-
+from .utils import get_openai_client, get_user_context, format_user_context
 class ChatService:
     def __init__(self, system_prompt, history):
         self.system_prompt = system_prompt

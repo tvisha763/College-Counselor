@@ -1,0 +1,5 @@
+accounts:
+  - username: a@gmail.com
+    password: testing_password_123
+  - username: b@gmail.com
+    password: testing_password_123

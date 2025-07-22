@@ -97,6 +97,14 @@ DATABASES = {
     }
 }
 
+DEFAULT_FROM_EMAIL = 'counselorpablo@gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'counselorpablo@gmail.com'
+EMAIL_HOST_PASSWORD = 'qyga hznw umlp bodq'
+EMAIL_USE_TLS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -171,7 +179,9 @@ SESSION_COOKIE_HTTPONLY = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://localhost:8000",
+
 ]
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
