@@ -49,7 +49,7 @@
     </form>
 
     {% if search_results %}
-    <h3 class="mb-4">Search Results</h3>
+    <h3 class="mb-4" style="color: #d66ba0;">Search Results</h3>
     <div class="row">
         {% for result in search_results %}
         <div class="col-md-6 mb-4">
@@ -74,7 +74,7 @@
                     <form action="{% url 'counselor:add_college' %}" method="POST">
                         {% csrf_token %}
                         <input type="hidden" name="college_name" value="{{ result.name }}">
-                        <button type="submit" class="btn btn-primary">Add College</button>
+                        <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add College</button>
                     </form>
                 </div>
             </div>
