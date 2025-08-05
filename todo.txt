@@ -13,3 +13,6 @@
 16. usage stats
 17. email updates
     - include reminders on staying up to date
+view password - add to sign up form
+webscraping for the vector db
+- everything

@@ -53,9 +53,10 @@ from .utils import (
     serialize_extracurriculars,
     serialize_schedule,
     update_schedule_entry,
+    get_sched_data,
+    get_context
 )
 from counselor_chat.utils import get_openai_client
-
 
 def home(request):
     return render(request, "home.html")
@@ -258,21 +259,7 @@ def edit_profile(request):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an AI college counselor named Counselor Pablo. Generate a personalized introduction message for the user based on their profile, especially college and major goals. Tell them what they need to know for their college journey and how you can help them. Use the following user profile information:g to apply for college, and base information that college counselors typically explain on the first session.",
-                },
-                {
-                    "role": "user",
-                    "content": json.dumps(
-                        {
-                            "fname": user.fname,
-                            "lname": user.lname,
-                            "grade": user.get_grade_display(),
-                            "college_goals": user.college_goals,
-                            "major_goals": user.major_goals,
-                            "class_rank": user.class_rank,
-                            "class_size": user.class_size
-                        }
-                    ),
+                    "content": "You are an AI college counselor named Counselor Pablo. Generate a personalized introduction message for the user based on their profile, especially college and major goals. Tell them what they need to know for their college journey and how you can help them. Use the following user profile information: " + get_context(user),
                 },
             ],
         )
@@ -419,8 +406,8 @@ def edit_extracurriculars(request):
         (15, "Journalism/Publication"),
         (16, "Junior ROTC"),
         (17, "LGBTQIA+"),
-        (18, "Music: Instrumental"),
         (19, "Music: Vocal"),
+        (18, "Music: Instrumental"),
         (20, "Religious"),
         (21, "Research"),
         (22, "Robotics"),
@@ -441,20 +428,6 @@ def edit_extracurriculars(request):
             "extracurricular_types": TYPE,
         },
     )
-
-
-def get_sched_data(sched):
-    if sched != None:
-        sched_data = {
-            "grades": sched.grades,
-            "ap scores": sched.ap_scores,
-            "ib scores": sched.ib_scores,
-            "sem1 gpa": sched.sem1_gpa,
-            "sem2 gpa": sched.sem2_gpa,
-        }
-        return sched_data
-    else:
-        return {"data": "No Data"}
 
 
 common_words = [
@@ -535,83 +508,15 @@ def college_search(request):
             )
 
     colleges = []
-
-    user_data = {
-        "school": user.school,
-        "grade": user.GRADE[user.grade - 9][1],
-        "location": user.location,
-        "citizenship": user.CITIZENSHIP[user.citizenship_status - 1][1],
-        "college goals": user.college_goals,
-        "major goals": user.major_goals,
-        "class rank": user.class_rank,
-        "class size": user.class_size,
-        "first gen status": user.FIRST_GEN[user.first_gen - 1][1],
-        "ethnicity": user.ethnicity,
-        "gender": user.gender,
-        "psat": user.psat,
-        "sat": user.sat,
-        "act": user.act,
-    }
-
-    ec_str = ""
-    for ec in TakenEC.objects.filter(user=user):
-        data = [
-            {
-                "name": ec.extracurricular.name,
-                "description": ec.extracurricular.description,
-                "position": ec.extracurricular.position,
-                "type": ec.extracurricular.get_type_display(),  # convert choice field to readable string
-                "start_date": (
-                    ec.extracurricular.start_date.isoformat()
-                    if ec.extracurricular.start_date
-                    else None
-                ),
-                "end_date": (
-                    ec.extracurricular.end_date.isoformat()
-                    if ec.extracurricular.end_date
-                    else None
-                ),
-            }
-        ]
-
-        ec_str += json.dumps(({"extracurriculars": data})) + " "
-
-    award_str = ""
-    for a in WonAward.objects.filter(user=user):
-        data = [
-            {
-                "name": a.award.name,
-                "description": a.award.description,
-                "date_received": (
-                    a.award.date_received.isoformat()
-                    if a.award.date_received
-                    else None
-                ),
-            }
-        ]
-
-        award_str += json.dumps(({"awards": data})) + " "
-
+    
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {
                 "role": "system",
-                "content": "You are to suggest 10 colleges for the user to apply to, given the following information. \n User Profile: "
-                + json.dumps(user_data)
-                + "\n Freshman Schedule: "
-                + json.dumps(get_sched_data(user.freshman_schedule))
-                + "\n Sophomore Schedule: "
-                + json.dumps(get_sched_data(user.sophomore_schedule))
-                + "\n Junior Schedule: "
-                + json.dumps(get_sched_data(user.junior_schedule))
-                + "\n Senior Schedule: "
-                + json.dumps(get_sched_data(user.senior_schedule))
-                + "\n Extracurriculars: "
-                + ec_str
-                + "\n Awards"
-                + award_str
+                "content": "You are to suggest 10 colleges for the user to apply to, given the following information. \n"
+                + get_context(user)
                 + "Respond with 10 college names in the form of a Python list of strings, and nothing else. Make sure to inclued a good ratio of safety, target, and reach schools.",
             }
         ],
@@ -828,62 +733,6 @@ def analyze_essay(request):
             # OpenAI setup
             client = get_openai_client()
 
-            user_data = {
-                "school": user.school,
-                "grade": user.GRADE[user.grade - 9][1],
-                "location": user.location,
-                "citizenship": user.CITIZENSHIP[user.citizenship_status - 1][1],
-                "college goals": user.college_goals,
-                "major goals": user.major_goals,
-                "class rank": user.class_rank,
-                "class size": user.class_size,
-                "first gen status": user.FIRST_GEN[user.first_gen - 1][1],
-                "ethnicity": user.ethnicity,
-                "gender": user.gender,
-                "psat": user.psat,
-                "sat": user.sat,
-                "act": user.act,
-            }
-
-            ec_str = ""
-            for ec in TakenEC.objects.filter(user=user):
-                data = [
-                    {
-                        "name": ec.extracurricular.name,
-                        "description": ec.extracurricular.description,
-                        "position": ec.extracurricular.position,
-                        "type": ec.extracurricular.get_type_display(),  # convert choice field to readable string
-                        "start_date": (
-                            ec.extracurricular.start_date.isoformat()
-                            if ec.extracurricular.start_date
-                            else None
-                        ),
-                        "end_date": (
-                            ec.extracurricular.end_date.isoformat()
-                            if ec.extracurricular.end_date
-                            else None
-                        ),
-                    }
-                ]
-
-                ec_str += json.dumps(({"extracurriculars": data})) + " "
-
-            award_str = ""
-            for a in WonAward.objects.filter(user=user):
-                data = [
-                    {
-                        "name": a.award.name,
-                        "description": a.award.description,
-                        "date_received": (
-                            a.award.date_received.isoformat()
-                            if a.award.date_received
-                            else None
-                        ),
-                    }
-                ]
-
-                award_str += json.dumps(({"extracurriculars": data})) + " "
-
             # Prompt emphasizes using exact substrings from essay
             system_prompt = """
                 You are an expert college admissions counselor.
@@ -904,7 +753,7 @@ def analyze_essay(request):
                 - Limit each highlighted 'text' to one sentence or phrase (around 5–20 words).
                 - Include no more than 10 suggestions. Fewer than 10 is also fine. 10 is just the upper limit.
                 - Only offer a suggestion if something should be changed
-                """ + "User Profile: " + json.dumps(user_data) + "\n Freshman Schedule: " + json.dumps(get_sched_data(user.freshman_schedule)) + "\n Sophomore Schedule: " + json.dumps(get_sched_data(user.sophomore_schedule)) + "\n Junior Schedule: " + json.dumps(get_sched_data(user.junior_schedule)) + "\n Senior Schedule: " + json.dumps(get_sched_data(user.senior_schedule)) + "\n Extracurriculars: " + ec_str + "\n Awards" + award_str
+                """ + get_context(user)
 
             response = client.chat.completions.create(
                 model="gpt-4",
