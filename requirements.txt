@@ -8,3 +8,5 @@ RapidFuzz==3.13.0
 requests==2.32.3
 whitenoise==6.9.0
 argon2-cffi
+whitenoise
+
