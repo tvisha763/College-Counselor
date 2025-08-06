@@ -96,7 +96,7 @@ def get_sched_data(sched):
 def get_context(user):
     user_data = {
         "school": user.school,
-        "grade": user.GRADE[user.grade - 9][1] if user.grade != None else None,
+        "grade": str(user.GRADE[user.grade - 9][1]) if user.grade != None else None,
         "location": user.location,
         "citizenship": user.CITIZENSHIP[user.citizenship_status - 1][1] if user.citizenship_status != None else None,
         "college goals": user.college_goals,

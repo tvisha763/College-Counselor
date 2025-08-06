@@ -209,10 +209,7 @@ def edit_profile(request):
             "fname",
             "lname",
             "email",
-            "grade",
             "location",
-            "citizenship_status",
-            "first_gen",
             "ethnicity",
             "gender",
             "college_goals",
@@ -229,6 +226,10 @@ def edit_profile(request):
             for field in fields
         }
 
+        
+        user.grade = int(request.POST.get("grade"))
+        user.citizenship_status = int(request.POST.get("citizenship_status"))
+        user.first_gen = int(request.POST.get("first_gen"))
         resume_file = request.FILES.get("resume")
         if resume_file:
             user.resume = resume_file
