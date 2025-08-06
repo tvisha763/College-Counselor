@@ -28,7 +28,7 @@
                         <strong>Student-to-Faculty Ratio:</strong> {{ college.s_f_ratio }}<br>
                         <strong>Graduation Rate:</strong> {{ college.grad_rate }}%
                     </p>
-                    <form action="{% url 'counselor:add_college' %}" method="POST">
+                    <form action="{% url 'counselor:add_college' %}" method="GET">
                         {% csrf_token %}
                         <input type="hidden" name="college_name" value="{{ college.name }}">
                         <button type="submit" class="btn btn-custom" style="background-color: #9df7e5; color: #ffff;">Add College</button>
