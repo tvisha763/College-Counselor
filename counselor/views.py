@@ -618,8 +618,6 @@ def college_search(request):
 
 @login_required(login_url="counselor:login")
 def add_college(request):
-    if not request.session.get("logged_in") or not request.session.get("email"):
-        return redirect("counselor:login")
     if request.method == "GET":
         college_name = request.GET.get("college_name")
         user = User.objects.get(email=request.session["email"])
@@ -635,7 +633,7 @@ def add_college(request):
             application_status=1,
         )
         app.save()
-        return redirect("counselor:college_search")
+        return redirect("counselor:dashboard")
 
 
 @login_required(login_url="counselor:login")
